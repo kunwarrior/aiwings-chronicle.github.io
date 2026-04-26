@@ -11,7 +11,7 @@ const ADMIN_PASSWORD = Deno.env.get("ADMIN_PASSWORD") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const ALLOWED_TABLES = new Set(["activities", "events", "gallery", "achievements", "registrations"]);
+const ALLOWED_TABLES = new Set(["activities", "events", "gallery", "achievements", "registrations", "team_members"]);
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
