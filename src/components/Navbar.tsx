@@ -4,6 +4,8 @@ import { useTheme, ACCENT_LIST } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import aiWingsLogo from "@/assets/aiwings-logo.png";
+import ggctLogo from "@/assets/ggct-logo.jpg";
 
 const NAV = [
   { id: "about", label: "About" },
@@ -49,13 +51,16 @@ export const Navbar = () => {
           )}
         >
           <a href="#top" className="flex items-center gap-2.5 group">
-            <div className="relative h-9 w-9 rounded-xl bg-gradient-primary shadow-glow flex items-center justify-center overflow-hidden">
-              <span className="font-display font-bold text-primary-foreground text-sm">AI</span>
-              <div className="absolute inset-0 animate-shimmer bg-[linear-gradient(110deg,transparent,hsl(0_0%_100%/.2),transparent)] bg-[length:200%_100%]" />
+            <div className="relative h-10 w-10 rounded-xl bg-background/40 backdrop-blur ring-1 ring-primary/30 shadow-glow flex items-center justify-center overflow-hidden group-hover:ring-primary/60 transition-all">
+              <img src={aiWingsLogo} alt="The AI Wings" className="h-9 w-9 object-contain" />
+              <div className="absolute inset-0 animate-shimmer bg-[linear-gradient(110deg,transparent,hsl(var(--primary)/.15),transparent)] bg-[length:200%_100%]" />
             </div>
             <div className="leading-tight">
-              <div className="font-display font-bold text-base">The AI Wings</div>
-              <div className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">GGCT</div>
+              <div className="font-display font-bold text-base flex items-center gap-1.5">
+                The AI Wings
+                <img src={ggctLogo} alt="GGCT" className="h-4 w-4 rounded-full object-cover ring-1 ring-border" />
+              </div>
+              <div className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Gyan Ganga · CSE-AI</div>
             </div>
           </a>
 
