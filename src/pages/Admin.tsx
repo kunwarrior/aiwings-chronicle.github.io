@@ -226,6 +226,38 @@ const Admin = () => {
             />
           </TabsContent>
 
+          <TabsContent value="team">
+            <TableManager
+              password={password}
+              table="team_members"
+              fields={[
+                { key: "full_name", label: "Full name", required: true },
+                { key: "role", label: "Role / Title", required: true },
+                { key: "category", label: "Category (faculty / leader / member)", required: true },
+                { key: "branch", label: "Branch (optional)" },
+                { key: "year", label: "Year (optional)" },
+                { key: "image_url", label: "Photo URL (optional)", type: "url" },
+                { key: "sort_order", label: "Sort order (number, optional)" },
+              ]}
+              listRender={(r) => (
+                <div className="flex gap-3 items-center">
+                  {r.image_url ? (
+                    <img src={r.image_url as string} alt="" className="h-12 w-12 rounded-lg object-cover" />
+                  ) : (
+                    <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-display font-semibold text-sm">
+                      {String(r.full_name).split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <div className="text-[10px] font-mono text-primary uppercase">{String(r.category)}</div>
+                    <div className="font-semibold">{String(r.full_name)}</div>
+                    <div className="text-sm text-muted-foreground">{String(r.role)}</div>
+                  </div>
+                </div>
+              )}
+            />
+          </TabsContent>
+
           <TabsContent value="gallery">
             <TableManager
               password={password}
