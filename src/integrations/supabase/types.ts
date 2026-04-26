@@ -14,7 +14,161 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      achievements: {
+        Row: {
+          achieved_on: string | null
+          created_at: string
+          description: string
+          icon: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          achieved_on?: string | null
+          created_at?: string
+          description: string
+          icon?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          achieved_on?: string | null
+          created_at?: string
+          description?: string
+          icon?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      activities: {
+        Row: {
+          activity_date: string
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          title: string
+        }
+        Insert: {
+          activity_date?: string
+          created_at?: string
+          description: string
+          id?: string
+          image_url?: string | null
+          title: string
+        }
+        Update: {
+          activity_date?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          created_at: string
+          description: string
+          event_date: string
+          id: string
+          image_url: string | null
+          registration_open: boolean
+          title: string
+          venue: string | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          event_date: string
+          id?: string
+          image_url?: string | null
+          registration_open?: boolean
+          title: string
+          venue?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          event_date?: string
+          id?: string
+          image_url?: string | null
+          registration_open?: boolean
+          title?: string
+          venue?: string | null
+        }
+        Relationships: []
+      }
+      gallery: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          title: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          title: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      registrations: {
+        Row: {
+          branch: string | null
+          created_at: string
+          email: string
+          event_id: string | null
+          full_name: string
+          id: string
+          message: string | null
+          phone: string
+          year: string | null
+        }
+        Insert: {
+          branch?: string | null
+          created_at?: string
+          email: string
+          event_id?: string | null
+          full_name: string
+          id?: string
+          message?: string | null
+          phone: string
+          year?: string | null
+        }
+        Update: {
+          branch?: string | null
+          created_at?: string
+          email?: string
+          event_id?: string | null
+          full_name?: string
+          id?: string
+          message?: string | null
+          phone?: string
+          year?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
