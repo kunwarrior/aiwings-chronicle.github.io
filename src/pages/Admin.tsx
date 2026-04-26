@@ -179,6 +179,7 @@ const Admin = () => {
           <TabsList className="mb-6 flex-wrap h-auto">
             <TabsTrigger value="activities">Activities</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
+            <TabsTrigger value="team">Team</TabsTrigger>
             <TabsTrigger value="gallery">Gallery</TabsTrigger>
             <TabsTrigger value="achievements">Achievements</TabsTrigger>
             <TabsTrigger value="registrations">Registrations</TabsTrigger>
