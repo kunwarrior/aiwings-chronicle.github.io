@@ -115,7 +115,7 @@ export const Register = () => {
               </div>
               <div>
                 <Label>Branch</Label>
-                <Input value={form.branch} onChange={(e) => setForm({ ...form, branch: e.target.value })} placeholder="CSE / IT / EC …" />
+                <Input value={form.branch} onChange={(e) => setForm({ ...form, branch: e.target.value })} placeholder="AI&DS / IT / EC …" />
               </div>
               <div>
                 <Label>Year</Label>

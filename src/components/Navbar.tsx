@@ -60,7 +60,7 @@ export const Navbar = () => {
                 The AI Wings
                 <img src={ggctLogo} alt="GGCT" className="h-4 w-4 rounded-full object-cover ring-1 ring-border" />
               </div>
-              <div className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Gyan Ganga · CSE-AI</div>
+              <div className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Gyan Ganga · AI&DS-AI</div>
             </div>
           </a>
 
