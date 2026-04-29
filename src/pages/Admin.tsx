@@ -31,7 +31,7 @@ interface Row { id: string; created_at: string; [k: string]: unknown }
 const TableManager = ({ password, table, fields, listRender }: {
   password: string;
   table: string;
-  fields: { key: string; label: string; type?: "text" | "textarea" | "date" | "datetime" | "url"; required?: boolean }[];
+  fields: { key: string; label: string; type?: "text" | "textarea" | "date" | "datetime" | "url" | "number"; required?: boolean }[];
   listRender: (r: Row) => React.ReactNode;
 }) => {
   const [rows, setRows] = useState<Row[]>([]);
@@ -281,7 +281,7 @@ const Admin = () => {
                 { key: "branch", label: "Branch (optional)" },
                 { key: "year", label: "Year (optional)" },
                 { key: "image_url", label: "Photo URL (optional)", type: "url" },
-                { key: "sort_order", label: "Sort order (number, optional)" },
+                { key: "sort_order", label: "Sort order (number, optional)", type: "number" },
               ]}
               listRender={(r) => (
                 <div className="flex gap-3 items-center">
