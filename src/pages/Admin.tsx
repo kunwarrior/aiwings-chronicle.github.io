@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Plus, Trash2, Lock, Sparkles, Pencil, X } from "lucide-react";
+import { ImageInput } from "@/components/admin/ImageInput";
 
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
 
@@ -31,7 +32,7 @@ interface Row { id: string; created_at: string; [k: string]: unknown }
 const TableManager = ({ password, table, fields, listRender }: {
   password: string;
   table: string;
-  fields: { key: string; label: string; type?: "text" | "textarea" | "date" | "datetime" | "url" | "number"; required?: boolean }[];
+  fields: { key: string; label: string; type?: "text" | "textarea" | "date" | "datetime" | "url" | "number" | "image"; required?: boolean }[];
   listRender: (r: Row) => React.ReactNode;
 }) => {
   const [rows, setRows] = useState<Row[]>([]);
@@ -105,9 +106,11 @@ const TableManager = ({ password, table, fields, listRender }: {
         </div>
         {fields.map(f => (
           <div key={f.key}>
-            <Label>{f.label}{f.required && " *"}</Label>
+            {f.type !== "image" && <Label>{f.label}{f.required && " *"}</Label>}
             {f.type === "textarea" ? (
               <Textarea rows={3} value={form[f.key] ?? ""} onChange={e => setForm({ ...form, [f.key]: e.target.value })} required={f.required} />
+            ) : f.type === "image" ? (
+              <ImageInput label={f.label} value={form[f.key] ?? ""} onChange={(v) => setForm({ ...form, [f.key]: v })} />
             ) : (
               <Input
                 type={f.type === "date" ? "date" : f.type === "datetime" ? "datetime-local" : f.type === "url" ? "url" : f.type === "number" ? "number" : "text"}
