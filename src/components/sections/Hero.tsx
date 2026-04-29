@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import aiWingsLogo from "@/assets/aiwings-logo.png";
-import ggctLogo from "@/assets/ggct-logo.jpg";
+import ggctLogo from "@/assets/ggct-logo.png";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Cpu, Zap } from "lucide-react";
 import { club } from "@/data/club";
@@ -109,16 +109,15 @@ export const Hero = () => {
       <div className="container-x relative">
         {/* College badge with BIG logo */}
         <div className="flex justify-center mb-8 animate-fade-in">
-          <div className="inline-flex items-center gap-3 pl-2 pr-5 py-2 rounded-full glass backdrop-blur-xl shadow-glow">
-            <div className="relative h-10 w-10 rounded-full overflow-hidden ring-2 ring-primary/40 shadow-glow">
-              <img src={ggctLogo} alt="GGCT" className="h-full w-full object-cover" />
-              <div className="absolute inset-0 rounded-full ring-1 ring-inset ring-primary/30" />
+          <div className="inline-flex items-center gap-4 pl-3 pr-6 py-3 rounded-full glass backdrop-blur-xl shadow-glow">
+            <div className="relative h-14 w-14 shrink-0">
+              <img src={ggctLogo} alt="GGCT" className="h-full w-full object-contain drop-shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />
             </div>
             <div className="text-left leading-tight">
-              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-primary">Official AI Club</div>
-              <div className="text-sm font-semibold">{club.college}</div>
+              <div className="text-sm md:text-base font-display font-bold uppercase tracking-[0.18em] text-gradient">Official AI Club</div>
+              <div className="text-xs md:text-sm font-semibold text-muted-foreground">{club.college}</div>
             </div>
-            <span className="h-2 w-2 rounded-full bg-primary animate-neural-pulse" />
+            <span className="h-2.5 w-2.5 rounded-full bg-primary animate-neural-pulse" />
           </div>
         </div>
 
@@ -165,47 +164,39 @@ export const Hero = () => {
             </div>
           </div>
 
-          {/* Dual Logo showcase — BIG college + AI Wings */}
-          <div ref={logoRef} className="relative hidden lg:flex items-center justify-center transition-transform duration-300 ease-out animate-fade-in min-h-[520px]" style={{ animationDelay: "0.2s" }}>
+          {/* AI Wings logo showcase — rings only, no GGCT badge */}
+          <div ref={logoRef} className="relative hidden lg:flex items-center justify-center transition-transform duration-300 ease-out animate-fade-in min-h-[560px]" style={{ animationDelay: "0.2s" }}>
             {/* Glow */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-96 w-96 rounded-full bg-primary/25 blur-3xl animate-pulse-glow" />
+              <div className="h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-pulse-glow" />
             </div>
 
             {/* Outer rotating ring with markers */}
-            <div className="absolute h-[520px] w-[520px] rounded-full border border-primary/20 animate-[spin_30s_linear_infinite]">
+            <div className="absolute h-[540px] w-[540px] rounded-full border border-primary/20 animate-[spin_30s_linear_infinite]">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div
                   key={i}
                   className="absolute h-2 w-2 rounded-full bg-primary shadow-glow"
                   style={{
                     top: "50%", left: "50%",
-                    transform: `rotate(${i * 45}deg) translateY(-260px)`,
+                    transform: `rotate(${i * 45}deg) translateY(-270px)`,
                   }}
                 />
               ))}
             </div>
             {/* Middle counter-rotating ring */}
-            <div className="absolute h-[420px] w-[420px] rounded-full border border-accent/20 animate-[spin_20s_linear_infinite_reverse]">
+            <div className="absolute h-[440px] w-[440px] rounded-full border border-accent/20 animate-[spin_20s_linear_infinite_reverse]">
               <div className="absolute -top-1 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-accent shadow-glow" />
               <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-accent shadow-glow" />
             </div>
             {/* Inner dashed ring */}
-            <div className="absolute h-[340px] w-[340px] rounded-full border-2 border-dashed border-primary/15 animate-[spin_40s_linear_infinite]" />
+            <div className="absolute h-[360px] w-[360px] rounded-full border-2 border-dashed border-primary/15 animate-[spin_40s_linear_infinite]" />
 
-            {/* Big College logo at top */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20">
-              <div className="relative h-28 w-28 rounded-full overflow-hidden ring-4 ring-primary/40 shadow-glow bg-background animate-float">
-                <img src={ggctLogo} alt="Gyan Ganga College of Technology" className="h-full w-full object-cover" />
-              </div>
-              <div className="text-center mt-2 text-[10px] font-mono uppercase tracking-[0.2em] text-primary">GGCT</div>
-            </div>
-
-            {/* AI Wings logo center */}
+            {/* AI Wings logo center — BIGGER */}
             <img
               src={aiWingsLogo}
               alt="The AI Wings logo"
-              className="relative z-10 w-[360px] max-w-full drop-shadow-[0_0_50px_hsl(var(--primary)/0.6)] animate-float"
+              className="relative z-10 w-[460px] max-w-full drop-shadow-[0_0_60px_hsl(var(--primary)/0.7)] animate-float"
               style={{ animationDelay: "1s" }}
             />
 
@@ -219,13 +210,9 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* Mobile: big logos row */}
-        <div className="lg:hidden mt-12 flex items-center justify-center gap-6 animate-fade-in">
-          <div className="relative h-24 w-24 rounded-full overflow-hidden ring-4 ring-primary/40 shadow-glow bg-background animate-float">
-            <img src={ggctLogo} alt="GGCT" className="h-full w-full object-cover" />
-          </div>
-          <div className="h-px w-8 bg-gradient-to-r from-primary to-accent" />
-          <img src={aiWingsLogo} alt="The AI Wings" className="h-28 w-28 object-contain drop-shadow-[0_0_30px_hsl(var(--primary)/0.5)] animate-float" style={{ animationDelay: "1s" }} />
+        {/* Mobile: AI Wings big logo only (GGCT already shown in badge above) */}
+        <div className="lg:hidden mt-12 flex items-center justify-center animate-fade-in">
+          <img src={aiWingsLogo} alt="The AI Wings" className="h-44 w-44 object-contain drop-shadow-[0_0_40px_hsl(var(--primary)/0.6)] animate-float" style={{ animationDelay: "1s" }} />
         </div>
       </div>
 
