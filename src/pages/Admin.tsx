@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Plus, Trash2, Lock, Sparkles } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Trash2, Lock, Sparkles, Pencil, X } from "lucide-react";
 
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
 
@@ -31,12 +31,13 @@ interface Row { id: string; created_at: string; [k: string]: unknown }
 const TableManager = ({ password, table, fields, listRender }: {
   password: string;
   table: string;
-  fields: { key: string; label: string; type?: "text" | "textarea" | "date" | "datetime" | "url"; required?: boolean }[];
+  fields: { key: string; label: string; type?: "text" | "textarea" | "date" | "datetime" | "url" | "number"; required?: boolean }[];
   listRender: (r: Row) => React.ReactNode;
 }) => {
   const [rows, setRows] = useState<Row[]>([]);
   const [form, setForm] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const reload = async () => {
     try {
@@ -47,19 +48,48 @@ const TableManager = ({ password, table, fields, listRender }: {
 
   useEffect(() => { reload(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [table]);
 
-  const create = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     try {
       const payload: Record<string, unknown> = {};
-      fields.forEach(f => { if (form[f.key]) payload[f.key] = form[f.key]; });
-      await call(password, { action: "insert", table, payload });
-      setForm({});
-      toast.success("Added");
+      fields.forEach(f => {
+        const v = form[f.key];
+        if (v !== undefined && v !== "") {
+          // sort_order is integer
+          payload[f.key] = f.key === "sort_order" ? Number(v) : v;
+        } else if (editingId) {
+          // when editing, allow clearing optional fields by sending null
+          if (!f.required) payload[f.key] = null;
+        }
+      });
+      if (editingId) {
+        await call(password, { action: "update", table, id: editingId, payload });
+        toast.success("Updated");
+      } else {
+        await call(password, { action: "insert", table, payload });
+        toast.success("Added");
+      }
+      setForm({}); setEditingId(null);
       reload();
     } catch (e) { toast.error((e as Error).message); }
     finally { setBusy(false); }
   };
+
+  const startEdit = (r: Row) => {
+    const next: Record<string, string> = {};
+    fields.forEach(f => {
+      const v = r[f.key];
+      if (v === null || v === undefined) return;
+      if (f.type === "date" && typeof v === "string") next[f.key] = v.slice(0, 10);
+      else if (f.type === "datetime" && typeof v === "string") next[f.key] = new Date(v).toISOString().slice(0, 16);
+      else next[f.key] = String(v);
+    });
+    setForm(next); setEditingId(r.id);
+    window.scrollTo({ top: 200, behavior: "smooth" });
+  };
+
+  const cancelEdit = () => { setForm({}); setEditingId(null); };
 
   const remove = async (id: string) => {
     if (!confirm("Delete this entry?")) return;
@@ -69,8 +99,10 @@ const TableManager = ({ password, table, fields, listRender }: {
 
   return (
     <div className="grid lg:grid-cols-5 gap-6">
-      <form onSubmit={create} className="lg:col-span-2 rounded-2xl bg-gradient-card border border-border p-5 space-y-3 h-fit">
-        <div className="font-display font-semibold text-lg flex items-center gap-2"><Plus className="h-4 w-4 text-primary" /> Add new</div>
+      <form onSubmit={submit} className="lg:col-span-2 rounded-2xl bg-gradient-card border border-border p-5 space-y-3 h-fit sticky top-6">
+        <div className="font-display font-semibold text-lg flex items-center gap-2">
+          {editingId ? <><Pencil className="h-4 w-4 text-primary" /> Edit entry</> : <><Plus className="h-4 w-4 text-primary" /> Add new</>}
+        </div>
         {fields.map(f => (
           <div key={f.key}>
             <Label>{f.label}{f.required && " *"}</Label>
@@ -78,7 +110,7 @@ const TableManager = ({ password, table, fields, listRender }: {
               <Textarea rows={3} value={form[f.key] ?? ""} onChange={e => setForm({ ...form, [f.key]: e.target.value })} required={f.required} />
             ) : (
               <Input
-                type={f.type === "date" ? "date" : f.type === "datetime" ? "datetime-local" : f.type === "url" ? "url" : "text"}
+                type={f.type === "date" ? "date" : f.type === "datetime" ? "datetime-local" : f.type === "url" ? "url" : f.type === "number" ? "number" : "text"}
                 value={form[f.key] ?? ""}
                 onChange={e => setForm({ ...form, [f.key]: e.target.value })}
                 required={f.required}
@@ -86,9 +118,16 @@ const TableManager = ({ password, table, fields, listRender }: {
             )}
           </div>
         ))}
-        <Button type="submit" disabled={busy} className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90">
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}
-        </Button>
+        <div className="flex gap-2">
+          <Button type="submit" disabled={busy} className="flex-1 bg-gradient-primary text-primary-foreground hover:opacity-90">
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? "Save changes" : "Add"}
+          </Button>
+          {editingId && (
+            <Button type="button" variant="outline" onClick={cancelEdit}>
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </form>
 
       <div className="lg:col-span-3 space-y-3">
@@ -98,11 +137,16 @@ const TableManager = ({ password, table, fields, listRender }: {
             Nothing here yet. Use the form to add the first one.
           </div>
         ) : rows.map(r => (
-          <div key={r.id} className="rounded-xl bg-gradient-card border border-border p-4 flex items-start justify-between gap-3">
+          <div key={r.id} className={`rounded-xl bg-gradient-card border p-4 flex items-start justify-between gap-3 transition-all ${editingId === r.id ? "border-primary shadow-glow" : "border-border"}`}>
             <div className="flex-1 min-w-0">{listRender(r)}</div>
-            <Button variant="ghost" size="icon" onClick={() => remove(r.id)} className="text-destructive hover:bg-destructive/10 shrink-0">
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            <div className="flex flex-col gap-1 shrink-0">
+              <Button variant="ghost" size="icon" onClick={() => startEdit(r)} className="text-primary hover:bg-primary/10">
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => remove(r.id)} className="text-destructive hover:bg-destructive/10">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         ))}
       </div>
@@ -237,7 +281,7 @@ const Admin = () => {
                 { key: "branch", label: "Branch (optional)" },
                 { key: "year", label: "Year (optional)" },
                 { key: "image_url", label: "Photo URL (optional)", type: "url" },
-                { key: "sort_order", label: "Sort order (number, optional)" },
+                { key: "sort_order", label: "Sort order (number, optional)", type: "number" },
               ]}
               listRender={(r) => (
                 <div className="flex gap-3 items-center">
