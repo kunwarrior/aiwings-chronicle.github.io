@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import aiWingsLogo from "@/assets/aiwings-logo.png";
-import ggctLogo from "@/assets/ggct-logo.jpg";
+import ggctLogo from "@/assets/ggct-logo.png";
 
 const NAV = [
   { id: "about", label: "About" },
@@ -22,6 +22,10 @@ const ACCENT_COLORS: Record<string, string> = {
   cyan: "hsl(189 94% 55%)",
   violet: "hsl(262 83% 65%)",
   emerald: "hsl(152 76% 50%)",
+  rose: "hsl(350 89% 60%)",
+  amber: "hsl(38 92% 55%)",
+  orange: "hsl(20 90% 58%)",
+  pink: "hsl(320 85% 62%)",
 };
 
 export const Navbar = () => {
@@ -51,8 +55,8 @@ export const Navbar = () => {
           )}
         >
           <a href="#top" className="flex items-center gap-3 group">
-            <div className="relative h-12 w-12 rounded-full overflow-hidden ring-2 ring-primary/40 shadow-glow group-hover:ring-primary transition-all">
-              <img src={ggctLogo} alt="GGCT" className="h-full w-full object-cover" />
+            <div className="relative h-14 w-14 shrink-0 group-hover:scale-105 transition-transform">
+              <img src={ggctLogo} alt="Gyan Ganga College of Technology" className="h-full w-full object-contain drop-shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />
             </div>
             <div className="relative h-11 w-11 rounded-xl bg-background/40 backdrop-blur ring-1 ring-primary/30 shadow-glow flex items-center justify-center overflow-hidden group-hover:ring-primary/60 transition-all">
               <img src={aiWingsLogo} alt="The AI Wings" className="h-10 w-10 object-contain" />

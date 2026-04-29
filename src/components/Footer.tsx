@@ -1,14 +1,14 @@
 import { club } from "@/data/club";
 import aiWingsLogo from "@/assets/aiwings-logo.png";
-import ggctLogo from "@/assets/ggct-logo.jpg";
+import ggctLogo from "@/assets/ggct-logo.png";
 
 export const Footer = () => {
   return (
     <footer className="border-t border-border py-10 mt-10">
       <div className="container-x flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-muted-foreground">
         <div className="flex items-center gap-4">
-          <div className="h-16 w-16 rounded-full overflow-hidden ring-2 ring-primary/40 shadow-glow">
-            <img src={ggctLogo} alt="GGCT" className="h-full w-full object-cover" />
+          <div className="h-20 w-20 shrink-0">
+            <img src={ggctLogo} alt="Gyan Ganga College of Technology" className="h-full w-full object-contain drop-shadow-[0_0_10px_hsl(var(--primary)/0.4)]" />
           </div>
           <div className="h-14 w-14 rounded-xl bg-background/40 ring-1 ring-primary/30 shadow-glow flex items-center justify-center overflow-hidden">
             <img src={aiWingsLogo} alt="The AI Wings" className="h-12 w-12 object-contain" />
