@@ -243,7 +243,7 @@ const Admin = () => {
                 { key: "title", label: "Title", required: true },
                 { key: "description", label: "Description", type: "textarea", required: true },
                 { key: "activity_date", label: "Date", type: "date", required: true },
-                { key: "image_url", label: "Image URL (optional)", type: "url" },
+                { key: "image_url", label: "Image (optional)", type: "image" },
               ]}
               listRender={(r) => (
                 <div>
@@ -264,7 +264,7 @@ const Admin = () => {
                 { key: "description", label: "Description", type: "textarea", required: true },
                 { key: "event_date", label: "Date & Time", type: "datetime", required: true },
                 { key: "venue", label: "Venue" },
-                { key: "image_url", label: "Image URL (optional)", type: "url" },
+                { key: "image_url", label: "Image (optional)", type: "image" },
               ]}
               listRender={(r) => (
                 <div>
@@ -286,7 +286,7 @@ const Admin = () => {
                 { key: "category", label: "Category (faculty / leader / member)", required: true },
                 { key: "branch", label: "Branch (optional)" },
                 { key: "year", label: "Year (optional)" },
-                { key: "image_url", label: "Photo URL (optional)", type: "url" },
+                { key: "image_url", label: "Profile photo (optional)", type: "image" },
                 { key: "sort_order", label: "Sort order (number, optional)", type: "number" },
               ]}
               listRender={(r) => (
@@ -314,7 +314,7 @@ const Admin = () => {
               table="gallery"
               fields={[
                 { key: "title", label: "Title", required: true },
-                { key: "image_url", label: "Image URL", type: "url", required: true },
+                { key: "image_url", label: "Image", type: "image", required: true },
                 { key: "caption", label: "Caption" },
               ]}
               listRender={(r) => (
