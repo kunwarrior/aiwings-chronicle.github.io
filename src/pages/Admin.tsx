@@ -178,7 +178,10 @@ const Admin = () => {
       sessionStorage.setItem("aiw-admin", password);
       setAuthed(true);
       toast.success("Welcome, admin");
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (err) {
+      const msg = (err as Error).message;
+      toast.error(msg === "Unauthorized" ? "Wrong password — try again" : msg);
+    }
     finally { setLoading(false); }
   };
 
