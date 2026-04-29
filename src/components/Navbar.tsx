@@ -50,17 +50,17 @@ export const Navbar = () => {
             scrolled ? "glass backdrop-blur-xl shadow-card" : "bg-transparent"
           )}
         >
-          <a href="#top" className="flex items-center gap-2.5 group">
-            <div className="relative h-10 w-10 rounded-xl bg-background/40 backdrop-blur ring-1 ring-primary/30 shadow-glow flex items-center justify-center overflow-hidden group-hover:ring-primary/60 transition-all">
-              <img src={aiWingsLogo} alt="The AI Wings" className="h-9 w-9 object-contain" />
+          <a href="#top" className="flex items-center gap-3 group">
+            <div className="relative h-12 w-12 rounded-full overflow-hidden ring-2 ring-primary/40 shadow-glow group-hover:ring-primary transition-all">
+              <img src={ggctLogo} alt="GGCT" className="h-full w-full object-cover" />
+            </div>
+            <div className="relative h-11 w-11 rounded-xl bg-background/40 backdrop-blur ring-1 ring-primary/30 shadow-glow flex items-center justify-center overflow-hidden group-hover:ring-primary/60 transition-all">
+              <img src={aiWingsLogo} alt="The AI Wings" className="h-10 w-10 object-contain" />
               <div className="absolute inset-0 animate-shimmer bg-[linear-gradient(110deg,transparent,hsl(var(--primary)/.15),transparent)] bg-[length:200%_100%]" />
             </div>
-            <div className="leading-tight">
-              <div className="font-display font-bold text-base flex items-center gap-1.5">
-                The AI Wings
-                <img src={ggctLogo} alt="GGCT" className="h-4 w-4 rounded-full object-cover ring-1 ring-border" />
-              </div>
-              <div className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Gyan Ganga · AI&DS-AI</div>
+            <div className="leading-tight hidden sm:block">
+              <div className="font-display font-bold text-base">The AI Wings</div>
+              <div className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Gyan Ganga · GGCT</div>
             </div>
           </a>
 
