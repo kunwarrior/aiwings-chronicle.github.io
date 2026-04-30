@@ -58,11 +58,13 @@ const TableManager = ({ password, table, fields, listRender }: {
       const payload: Record<string, unknown> = {};
       fields.forEach(f => {
         const v = form[f.key];
+        if (f.type === "boolean") {
+          payload[f.key] = v === "true";
+          return;
+        }
         if (v !== undefined && v !== "") {
-          // sort_order is integer
-          payload[f.key] = f.key === "sort_order" ? Number(v) : v;
+          payload[f.key] = f.type === "number" || f.key === "sort_order" ? Number(v) : v;
         } else if (editingId) {
-          // when editing, allow clearing optional fields by sending null
           if (!f.required) payload[f.key] = null;
         }
       });
