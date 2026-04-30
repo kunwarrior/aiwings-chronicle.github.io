@@ -280,10 +280,18 @@ const Admin = () => {
                 { key: "event_date", label: "Date & Time", type: "datetime", required: true },
                 { key: "venue", label: "Venue" },
                 { key: "image_url", label: "Image (optional)", type: "image" },
+                { key: "is_live", label: "Live now (show popup on home page)", type: "boolean", help: "Turn this on while the event is happening. A popup will appear on the home page for visitors." },
               ]}
               listRender={(r) => (
                 <div>
-                  <div className="text-xs font-mono text-primary uppercase">{fmt(r.event_date as string)}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-xs font-mono text-primary uppercase">{fmt(r.event_date as string)}</div>
+                    {r.is_live ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/15 text-destructive text-[10px] font-mono uppercase tracking-wider">
+                        <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" /> Live
+                      </span>
+                    ) : null}
+                  </div>
                   <div className="font-semibold">{String(r.title)}</div>
                   <div className="text-sm text-muted-foreground line-clamp-2">{String(r.description)}</div>
                 </div>
