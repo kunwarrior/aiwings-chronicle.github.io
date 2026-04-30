@@ -34,7 +34,7 @@ interface Row { id: string; created_at: string; [k: string]: unknown }
 const TableManager = ({ password, table, fields, listRender }: {
   password: string;
   table: string;
-  fields: { key: string; label: string; type?: "text" | "textarea" | "date" | "datetime" | "url" | "number" | "image" | "boolean"; required?: boolean; help?: string }[];
+  fields: { key: string; label: string; type?: "text" | "textarea" | "date" | "datetime" | "url" | "number" | "image" | "boolean" | "select"; required?: boolean; help?: string; options?: { value: string; label: string }[] }[];
   listRender: (r: Row) => React.ReactNode;
 }) => {
   const [rows, setRows] = useState<Row[]>([]);
@@ -115,6 +115,16 @@ const TableManager = ({ password, table, fields, listRender }: {
               <Textarea rows={3} value={form[f.key] ?? ""} onChange={e => setForm({ ...form, [f.key]: e.target.value })} required={f.required} />
             ) : f.type === "image" ? (
               <ImageInput label={f.label} value={form[f.key] ?? ""} onChange={(v) => setForm({ ...form, [f.key]: v })} />
+            ) : f.type === "select" ? (
+              <select
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={form[f.key] ?? ""}
+                onChange={e => setForm({ ...form, [f.key]: e.target.value })}
+                required={f.required}
+              >
+                <option value="">Select…</option>
+                {f.options?.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
             ) : f.type === "boolean" ? (
               <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border bg-background/40">
                 <div>
@@ -306,11 +316,17 @@ const Admin = () => {
               table="team_members"
               fields={[
                 { key: "full_name", label: "Full name", required: true },
-                { key: "role", label: "Role / Title", required: true },
-                { key: "category", label: "Category (faculty / leader / member)", required: true },
+                { key: "role", label: "Role / Title (e.g. HOD, President, Secretary)", required: true },
+                { key: "category", label: "Category", type: "select", required: true, options: [
+                  { value: "faculty", label: "Faculty / HOD" },
+                  { value: "leader", label: "Core Team / Leader" },
+                  { value: "member", label: "Member" },
+                ] },
                 { key: "branch", label: "Branch (optional)" },
                 { key: "year", label: "Year (optional)" },
                 { key: "image_url", label: "Profile photo (optional)", type: "image" },
+                { key: "linkedin_url", label: "LinkedIn URL (optional)", type: "url" },
+                { key: "instagram_url", label: "Instagram URL (optional)", type: "url" },
                 { key: "sort_order", label: "Sort order (number, optional)", type: "number" },
               ]}
               listRender={(r) => (

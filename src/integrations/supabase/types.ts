@@ -201,6 +201,8 @@ export type Database = {
           full_name: string
           id: string
           image_url: string | null
+          instagram_url: string | null
+          linkedin_url: string | null
           role: string
           sort_order: number
           year: string | null
@@ -212,6 +214,8 @@ export type Database = {
           full_name: string
           id?: string
           image_url?: string | null
+          instagram_url?: string | null
+          linkedin_url?: string | null
           role: string
           sort_order?: number
           year?: string | null
@@ -223,6 +227,8 @@ export type Database = {
           full_name?: string
           id?: string
           image_url?: string | null
+          instagram_url?: string | null
+          linkedin_url?: string | null
           role?: string
           sort_order?: number
           year?: string | null
