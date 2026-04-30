@@ -75,6 +75,7 @@ export type Database = {
           event_date: string
           id: string
           image_url: string | null
+          is_live: boolean
           registration_open: boolean
           title: string
           venue: string | null
@@ -85,6 +86,7 @@ export type Database = {
           event_date: string
           id?: string
           image_url?: string | null
+          is_live?: boolean
           registration_open?: boolean
           title: string
           venue?: string | null
@@ -95,6 +97,7 @@ export type Database = {
           event_date?: string
           id?: string
           image_url?: string | null
+          is_live?: boolean
           registration_open?: boolean
           title?: string
           venue?: string | null
@@ -168,6 +171,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      site_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
       }
       team_members: {
         Row: {

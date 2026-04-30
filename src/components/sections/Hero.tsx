@@ -4,14 +4,20 @@ import ggctLogo from "@/assets/ggct-logo.png";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Cpu, Zap } from "lucide-react";
 import { club } from "@/data/club";
+import { useHeroSettings } from "@/hooks/useSiteSettings";
 
 export const Hero = () => {
+  const { settings } = useHeroSettings();
+  const effectsOn = settings.effects_enabled;
+  const bgImage = settings.background_image_url;
+
   const wordsRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Mouse parallax
   useEffect(() => {
+    if (!effectsOn) return;
     let raf = 0;
     const handle = (e: MouseEvent) => {
       cancelAnimationFrame(raf);
@@ -24,10 +30,11 @@ export const Hero = () => {
     };
     window.addEventListener("mousemove", handle);
     return () => { window.removeEventListener("mousemove", handle); cancelAnimationFrame(raf); };
-  }, []);
+  }, [effectsOn]);
 
   // Neural network canvas — animated nodes + connecting lines
   useEffect(() => {
+    if (!effectsOn) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -90,21 +97,42 @@ export const Hero = () => {
     const onResize = () => { resize(); };
     window.addEventListener("resize", onResize);
     return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", onResize); };
-  }, []);
+  }, [effectsOn]);
 
   return (
     <section id="top" className="relative min-h-screen flex items-center pt-28 pb-20 overflow-hidden">
-      {/* Layered AI background */}
-      <div className="absolute inset-0 -z-30 bg-gradient-to-br from-background via-primary/5 to-background" />
-      <div className="absolute inset-0 -z-20 neural-grid opacity-40" />
+      {/* Custom background image (admin uploaded) */}
+      {bgImage && (
+        <>
+          <div
+            className="absolute inset-0 -z-30 bg-cover bg-center"
+            style={{ backgroundImage: `url(${bgImage})` }}
+          />
+          <div className="absolute inset-0 -z-25 bg-background/70 backdrop-blur-[2px]" />
+        </>
+      )}
+
+      {/* Layered AI background — only when no custom image */}
+      {!bgImage && (
+        <>
+          <div className="absolute inset-0 -z-30 bg-gradient-to-br from-background via-primary/5 to-background" />
+          {effectsOn && <div className="absolute inset-0 -z-20 neural-grid opacity-40" />}
+        </>
+      )}
 
       {/* Animated neural network */}
-      <canvas ref={canvasRef} className="absolute inset-0 -z-10 w-full h-full opacity-70" />
+      {effectsOn && (
+        <canvas ref={canvasRef} className="absolute inset-0 -z-10 w-full h-full opacity-70" />
+      )}
 
       {/* Animated orbs */}
-      <div className="absolute top-1/4 -left-32 h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-float" />
-      <div className="absolute bottom-1/4 -right-32 h-[32rem] w-[32rem] rounded-full bg-accent/25 blur-3xl animate-float" style={{ animationDelay: "2s" }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-primary/10 blur-3xl animate-pulse-glow" />
+      {effectsOn && (
+        <>
+          <div className="absolute top-1/4 -left-32 h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-float" />
+          <div className="absolute bottom-1/4 -right-32 h-[32rem] w-[32rem] rounded-full bg-accent/25 blur-3xl animate-float" style={{ animationDelay: "2s" }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-primary/10 blur-3xl animate-pulse-glow" />
+        </>
+      )}
 
       <div className="container-x relative">
         {/* College badge with BIG logo */}
@@ -171,26 +199,30 @@ export const Hero = () => {
               <div className="h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-pulse-glow" />
             </div>
 
-            {/* Outer rotating ring with markers */}
-            <div className="absolute h-[540px] w-[540px] rounded-full border border-primary/20 animate-[spin_30s_linear_infinite]">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute h-2 w-2 rounded-full bg-primary shadow-glow"
-                  style={{
-                    top: "50%", left: "50%",
-                    transform: `rotate(${i * 45}deg) translateY(-270px)`,
-                  }}
-                />
-              ))}
-            </div>
-            {/* Middle counter-rotating ring */}
-            <div className="absolute h-[440px] w-[440px] rounded-full border border-accent/20 animate-[spin_20s_linear_infinite_reverse]">
-              <div className="absolute -top-1 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-accent shadow-glow" />
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-accent shadow-glow" />
-            </div>
-            {/* Inner dashed ring */}
-            <div className="absolute h-[360px] w-[360px] rounded-full border-2 border-dashed border-primary/15 animate-[spin_40s_linear_infinite]" />
+            {effectsOn && (
+              <>
+                {/* Outer rotating ring with markers */}
+                <div className="absolute h-[540px] w-[540px] rounded-full border border-primary/20 animate-[spin_30s_linear_infinite]">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute h-2 w-2 rounded-full bg-primary shadow-glow"
+                      style={{
+                        top: "50%", left: "50%",
+                        transform: `rotate(${i * 45}deg) translateY(-270px)`,
+                      }}
+                    />
+                  ))}
+                </div>
+                {/* Middle counter-rotating ring */}
+                <div className="absolute h-[440px] w-[440px] rounded-full border border-accent/20 animate-[spin_20s_linear_infinite_reverse]">
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-accent shadow-glow" />
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-accent shadow-glow" />
+                </div>
+                {/* Inner dashed ring */}
+                <div className="absolute h-[360px] w-[360px] rounded-full border-2 border-dashed border-primary/15 animate-[spin_40s_linear_infinite]" />
+              </>
+            )}
 
             {/* AI Wings logo center — BIGGER */}
             <img

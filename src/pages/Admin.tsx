@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Plus, Trash2, Lock, Sparkles, Pencil, X } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Trash2, Lock, Sparkles, Pencil, X, Settings as SettingsIcon } from "lucide-react";
 import { ImageInput } from "@/components/admin/ImageInput";
+import { Switch } from "@/components/ui/switch";
+import { SiteSettingsPanel } from "@/components/admin/SiteSettingsPanel";
 
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
 
@@ -32,7 +34,7 @@ interface Row { id: string; created_at: string; [k: string]: unknown }
 const TableManager = ({ password, table, fields, listRender }: {
   password: string;
   table: string;
-  fields: { key: string; label: string; type?: "text" | "textarea" | "date" | "datetime" | "url" | "number" | "image"; required?: boolean }[];
+  fields: { key: string; label: string; type?: "text" | "textarea" | "date" | "datetime" | "url" | "number" | "image" | "boolean"; required?: boolean; help?: string }[];
   listRender: (r: Row) => React.ReactNode;
 }) => {
   const [rows, setRows] = useState<Row[]>([]);
@@ -56,11 +58,13 @@ const TableManager = ({ password, table, fields, listRender }: {
       const payload: Record<string, unknown> = {};
       fields.forEach(f => {
         const v = form[f.key];
+        if (f.type === "boolean") {
+          payload[f.key] = v === "true";
+          return;
+        }
         if (v !== undefined && v !== "") {
-          // sort_order is integer
-          payload[f.key] = f.key === "sort_order" ? Number(v) : v;
+          payload[f.key] = f.type === "number" || f.key === "sort_order" ? Number(v) : v;
         } else if (editingId) {
-          // when editing, allow clearing optional fields by sending null
           if (!f.required) payload[f.key] = null;
         }
       });
@@ -106,11 +110,22 @@ const TableManager = ({ password, table, fields, listRender }: {
         </div>
         {fields.map(f => (
           <div key={f.key}>
-            {f.type !== "image" && <Label>{f.label}{f.required && " *"}</Label>}
+            {f.type !== "image" && f.type !== "boolean" && <Label>{f.label}{f.required && " *"}</Label>}
             {f.type === "textarea" ? (
               <Textarea rows={3} value={form[f.key] ?? ""} onChange={e => setForm({ ...form, [f.key]: e.target.value })} required={f.required} />
             ) : f.type === "image" ? (
               <ImageInput label={f.label} value={form[f.key] ?? ""} onChange={(v) => setForm({ ...form, [f.key]: v })} />
+            ) : f.type === "boolean" ? (
+              <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border bg-background/40">
+                <div>
+                  <Label className="cursor-pointer">{f.label}</Label>
+                  {f.help && <p className="text-xs text-muted-foreground mt-0.5">{f.help}</p>}
+                </div>
+                <Switch
+                  checked={form[f.key] === "true"}
+                  onCheckedChange={(c) => setForm({ ...form, [f.key]: c ? "true" : "false" })}
+                />
+              </div>
             ) : (
               <Input
                 type={f.type === "date" ? "date" : f.type === "datetime" ? "datetime-local" : f.type === "url" ? "url" : f.type === "number" ? "number" : "text"}
@@ -233,6 +248,7 @@ const Admin = () => {
             <TabsTrigger value="gallery">Gallery</TabsTrigger>
             <TabsTrigger value="achievements">Achievements</TabsTrigger>
             <TabsTrigger value="registrations">Registrations</TabsTrigger>
+            <TabsTrigger value="settings"><SettingsIcon className="h-3.5 w-3.5 mr-1" /> Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="activities">
@@ -265,10 +281,18 @@ const Admin = () => {
                 { key: "event_date", label: "Date & Time", type: "datetime", required: true },
                 { key: "venue", label: "Venue" },
                 { key: "image_url", label: "Image (optional)", type: "image" },
+                { key: "is_live", label: "Live now (show popup on home page)", type: "boolean", help: "Turn this on while the event is happening. A popup will appear on the home page for visitors." },
               ]}
               listRender={(r) => (
                 <div>
-                  <div className="text-xs font-mono text-primary uppercase">{fmt(r.event_date as string)}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-xs font-mono text-primary uppercase">{fmt(r.event_date as string)}</div>
+                    {r.is_live ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/15 text-destructive text-[10px] font-mono uppercase tracking-wider">
+                        <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" /> Live
+                      </span>
+                    ) : null}
+                  </div>
                   <div className="font-semibold">{String(r.title)}</div>
                   <div className="text-sm text-muted-foreground line-clamp-2">{String(r.description)}</div>
                 </div>
@@ -370,6 +394,10 @@ const Admin = () => {
                 </div>
               )}
             />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <SiteSettingsPanel password={password} />
           </TabsContent>
         </Tabs>
       </div>
