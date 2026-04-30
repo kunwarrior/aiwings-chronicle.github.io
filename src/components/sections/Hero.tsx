@@ -199,26 +199,30 @@ export const Hero = () => {
               <div className="h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-pulse-glow" />
             </div>
 
-            {/* Outer rotating ring with markers */}
-            <div className="absolute h-[540px] w-[540px] rounded-full border border-primary/20 animate-[spin_30s_linear_infinite]">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute h-2 w-2 rounded-full bg-primary shadow-glow"
-                  style={{
-                    top: "50%", left: "50%",
-                    transform: `rotate(${i * 45}deg) translateY(-270px)`,
-                  }}
-                />
-              ))}
-            </div>
-            {/* Middle counter-rotating ring */}
-            <div className="absolute h-[440px] w-[440px] rounded-full border border-accent/20 animate-[spin_20s_linear_infinite_reverse]">
-              <div className="absolute -top-1 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-accent shadow-glow" />
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-accent shadow-glow" />
-            </div>
-            {/* Inner dashed ring */}
-            <div className="absolute h-[360px] w-[360px] rounded-full border-2 border-dashed border-primary/15 animate-[spin_40s_linear_infinite]" />
+            {effectsOn && (
+              <>
+                {/* Outer rotating ring with markers */}
+                <div className="absolute h-[540px] w-[540px] rounded-full border border-primary/20 animate-[spin_30s_linear_infinite]">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute h-2 w-2 rounded-full bg-primary shadow-glow"
+                      style={{
+                        top: "50%", left: "50%",
+                        transform: `rotate(${i * 45}deg) translateY(-270px)`,
+                      }}
+                    />
+                  ))}
+                </div>
+                {/* Middle counter-rotating ring */}
+                <div className="absolute h-[440px] w-[440px] rounded-full border border-accent/20 animate-[spin_20s_linear_infinite_reverse]">
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-accent shadow-glow" />
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-accent shadow-glow" />
+                </div>
+                {/* Inner dashed ring */}
+                <div className="absolute h-[360px] w-[360px] rounded-full border-2 border-dashed border-primary/15 animate-[spin_40s_linear_infinite]" />
+              </>
+            )}
 
             {/* AI Wings logo center — BIGGER */}
             <img
