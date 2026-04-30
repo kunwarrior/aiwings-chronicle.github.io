@@ -97,7 +97,7 @@ export const Hero = () => {
     const onResize = () => { resize(); };
     window.addEventListener("resize", onResize);
     return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", onResize); };
-  }, []);
+  }, [effectsOn]);
 
   return (
     <section id="top" className="relative min-h-screen flex items-center pt-28 pb-20 overflow-hidden">
