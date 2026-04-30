@@ -34,7 +34,7 @@ interface Row { id: string; created_at: string; [k: string]: unknown }
 const TableManager = ({ password, table, fields, listRender }: {
   password: string;
   table: string;
-  fields: { key: string; label: string; type?: "text" | "textarea" | "date" | "datetime" | "url" | "number" | "image"; required?: boolean }[];
+  fields: { key: string; label: string; type?: "text" | "textarea" | "date" | "datetime" | "url" | "number" | "image" | "boolean"; required?: boolean; help?: string }[];
   listRender: (r: Row) => React.ReactNode;
 }) => {
   const [rows, setRows] = useState<Row[]>([]);
