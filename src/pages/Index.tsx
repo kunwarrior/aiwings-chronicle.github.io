@@ -9,6 +9,7 @@ import { Gallery } from "@/components/sections/Gallery";
 import { Register } from "@/components/sections/Register";
 import { Contact } from "@/components/sections/Contact";
 import { Footer } from "@/components/Footer";
+import { LiveEventPopup } from "@/components/LiveEventPopup";
 
 const Index = () => {
   return (
@@ -24,6 +25,7 @@ const Index = () => {
       <Register />
       <Contact />
       <Footer />
+      <LiveEventPopup />
     </main>
   );
 };
