@@ -395,6 +395,10 @@ const Admin = () => {
               )}
             />
           </TabsContent>
+
+          <TabsContent value="settings">
+            <SiteSettingsPanel password={password} />
+          </TabsContent>
         </Tabs>
       </div>
     </main>
