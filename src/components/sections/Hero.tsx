@@ -17,6 +17,7 @@ export const Hero = () => {
 
   // Mouse parallax
   useEffect(() => {
+    if (!effectsOn) return;
     let raf = 0;
     const handle = (e: MouseEvent) => {
       cancelAnimationFrame(raf);
@@ -29,10 +30,11 @@ export const Hero = () => {
     };
     window.addEventListener("mousemove", handle);
     return () => { window.removeEventListener("mousemove", handle); cancelAnimationFrame(raf); };
-  }, []);
+  }, [effectsOn]);
 
   // Neural network canvas — animated nodes + connecting lines
   useEffect(() => {
+    if (!effectsOn) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
