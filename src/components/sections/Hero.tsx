@@ -4,8 +4,13 @@ import ggctLogo from "@/assets/ggct-logo.png";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Cpu, Zap } from "lucide-react";
 import { club } from "@/data/club";
+import { useHeroSettings } from "@/hooks/useSiteSettings";
 
 export const Hero = () => {
+  const { settings } = useHeroSettings();
+  const effectsOn = settings.effects_enabled;
+  const bgImage = settings.background_image_url;
+
   const wordsRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
