@@ -248,6 +248,7 @@ const Admin = () => {
             <TabsTrigger value="gallery">Gallery</TabsTrigger>
             <TabsTrigger value="achievements">Achievements</TabsTrigger>
             <TabsTrigger value="registrations">Registrations</TabsTrigger>
+            <TabsTrigger value="settings"><SettingsIcon className="h-3.5 w-3.5 mr-1" /> Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="activities">
