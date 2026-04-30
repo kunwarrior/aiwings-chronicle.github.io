@@ -110,11 +110,22 @@ const TableManager = ({ password, table, fields, listRender }: {
         </div>
         {fields.map(f => (
           <div key={f.key}>
-            {f.type !== "image" && <Label>{f.label}{f.required && " *"}</Label>}
+            {f.type !== "image" && f.type !== "boolean" && <Label>{f.label}{f.required && " *"}</Label>}
             {f.type === "textarea" ? (
               <Textarea rows={3} value={form[f.key] ?? ""} onChange={e => setForm({ ...form, [f.key]: e.target.value })} required={f.required} />
             ) : f.type === "image" ? (
               <ImageInput label={f.label} value={form[f.key] ?? ""} onChange={(v) => setForm({ ...form, [f.key]: v })} />
+            ) : f.type === "boolean" ? (
+              <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border bg-background/40">
+                <div>
+                  <Label className="cursor-pointer">{f.label}</Label>
+                  {f.help && <p className="text-xs text-muted-foreground mt-0.5">{f.help}</p>}
+                </div>
+                <Switch
+                  checked={form[f.key] === "true"}
+                  onCheckedChange={(c) => setForm({ ...form, [f.key]: c ? "true" : "false" })}
+                />
+              </div>
             ) : (
               <Input
                 type={f.type === "date" ? "date" : f.type === "datetime" ? "datetime-local" : f.type === "url" ? "url" : f.type === "number" ? "number" : "text"}
