@@ -101,17 +101,38 @@ export const Hero = () => {
 
   return (
     <section id="top" className="relative min-h-screen flex items-center pt-28 pb-20 overflow-hidden">
-      {/* Layered AI background */}
-      <div className="absolute inset-0 -z-30 bg-gradient-to-br from-background via-primary/5 to-background" />
-      <div className="absolute inset-0 -z-20 neural-grid opacity-40" />
+      {/* Custom background image (admin uploaded) */}
+      {bgImage && (
+        <>
+          <div
+            className="absolute inset-0 -z-30 bg-cover bg-center"
+            style={{ backgroundImage: `url(${bgImage})` }}
+          />
+          <div className="absolute inset-0 -z-25 bg-background/70 backdrop-blur-[2px]" />
+        </>
+      )}
+
+      {/* Layered AI background — only when no custom image */}
+      {!bgImage && (
+        <>
+          <div className="absolute inset-0 -z-30 bg-gradient-to-br from-background via-primary/5 to-background" />
+          {effectsOn && <div className="absolute inset-0 -z-20 neural-grid opacity-40" />}
+        </>
+      )}
 
       {/* Animated neural network */}
-      <canvas ref={canvasRef} className="absolute inset-0 -z-10 w-full h-full opacity-70" />
+      {effectsOn && (
+        <canvas ref={canvasRef} className="absolute inset-0 -z-10 w-full h-full opacity-70" />
+      )}
 
       {/* Animated orbs */}
-      <div className="absolute top-1/4 -left-32 h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-float" />
-      <div className="absolute bottom-1/4 -right-32 h-[32rem] w-[32rem] rounded-full bg-accent/25 blur-3xl animate-float" style={{ animationDelay: "2s" }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-primary/10 blur-3xl animate-pulse-glow" />
+      {effectsOn && (
+        <>
+          <div className="absolute top-1/4 -left-32 h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-float" />
+          <div className="absolute bottom-1/4 -right-32 h-[32rem] w-[32rem] rounded-full bg-accent/25 blur-3xl animate-float" style={{ animationDelay: "2s" }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-primary/10 blur-3xl animate-pulse-glow" />
+        </>
+      )}
 
       <div className="container-x relative">
         {/* College badge with BIG logo */}
