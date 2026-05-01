@@ -10,6 +10,7 @@ import { ArrowLeft, Loader2, Plus, Trash2, Lock, Sparkles, Pencil, X, Settings a
 import { ImageInput } from "@/components/admin/ImageInput";
 import { Switch } from "@/components/ui/switch";
 import { SiteSettingsPanel } from "@/components/admin/SiteSettingsPanel";
+import { RegistrationsPanel } from "@/components/admin/RegistrationsPanel";
 
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
 
