@@ -229,7 +229,7 @@ export const Hero = () => {
 
             {/* AI Wings logo center — BIGGER */}
             <img
-              src={aiWingsLogo}
+              src={heroLogo}
               alt="The AI Wings logo"
               className="relative z-10 w-[460px] max-w-full drop-shadow-[0_0_60px_hsl(var(--primary)/0.7)] animate-float"
               style={{ animationDelay: "1s" }}
