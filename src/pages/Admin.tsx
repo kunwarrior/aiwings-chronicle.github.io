@@ -392,27 +392,7 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="registrations">
-            <TableManager
-              password={password}
-              table="registrations"
-              fields={[
-                { key: "full_name", label: "Full name", required: true },
-                { key: "email", label: "Email", required: true },
-                { key: "phone", label: "Phone", required: true },
-              ]}
-              listRender={(r) => (
-                <div>
-                  <div className="font-semibold">{String(r.full_name)}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {String(r.email)} · {String(r.phone)}
-                    {r.branch ? ` · ${r.branch}` : ""}
-                    {r.year ? ` · ${r.year}` : ""}
-                  </div>
-                  {r.message ? <div className="text-sm mt-1 italic">"{String(r.message)}"</div> : null}
-                  <div className="text-[10px] font-mono text-muted-foreground mt-1">{fmt(r.created_at)}</div>
-                </div>
-              )}
-            />
+            <RegistrationsPanel password={password} />
           </TabsContent>
 
           <TabsContent value="settings">
