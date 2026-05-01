@@ -290,6 +290,8 @@ const Admin = () => {
                 { key: "description", label: "Description", type: "textarea", required: true },
                 { key: "event_date", label: "Date & Time", type: "datetime", required: true },
                 { key: "venue", label: "Venue" },
+                { key: "fee_amount", label: "Registration fee (₹) — leave 0 for free", type: "number" },
+                { key: "payment_instructions", label: "Payment instructions (UPI ID / account / steps)", type: "textarea" },
                 { key: "image_url", label: "Image (optional)", type: "image" },
                 { key: "is_live", label: "Live now (show popup on home page)", type: "boolean", help: "Turn this on while the event is happening. A popup will appear on the home page for visitors." },
               ]}
