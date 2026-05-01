@@ -6,10 +6,23 @@ export interface HeroSettings {
   background_image_url: string | null;
 }
 
-const DEFAULT: HeroSettings = { effects_enabled: true, background_image_url: null };
+export interface BrandingSettings {
+  hero_logo_url: string | null;
+  dark_bg_color: string | null;   // HSL string like "224 47% 4%"
+  dark_bg_color_2: string | null; // optional second color for gradient
+  color_effects_enabled: boolean; // glowing orbs / colour bursts
+}
 
-export const useHeroSettings = () => {
-  const [settings, setSettings] = useState<HeroSettings>(DEFAULT);
+const DEFAULT_HERO: HeroSettings = { effects_enabled: true, background_image_url: null };
+const DEFAULT_BRANDING: BrandingSettings = {
+  hero_logo_url: null,
+  dark_bg_color: null,
+  dark_bg_color_2: null,
+  color_effects_enabled: true,
+};
+
+const useSettingRow = <T extends object>(key: string, defaults: T) => {
+  const [settings, setSettings] = useState<T>(defaults);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -18,26 +31,30 @@ export const useHeroSettings = () => {
       const { data } = await supabase
         .from("site_settings")
         .select("value")
-        .eq("key", "hero")
+        .eq("key", key)
         .maybeSingle();
       if (active && data?.value) {
-        setSettings({ ...DEFAULT, ...(data.value as Partial<HeroSettings>) });
+        setSettings({ ...defaults, ...(data.value as Partial<T>) });
       }
       if (active) setLoaded(true);
     })();
 
     const channel = supabase
-      .channel("site_settings_hero")
+      .channel(`site_settings_${key}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "site_settings" }, (payload) => {
-        const row = (payload.new ?? payload.old) as { key?: string; value?: Partial<HeroSettings> } | null;
-        if (row?.key === "hero" && payload.new) {
-          setSettings({ ...DEFAULT, ...((payload.new as { value: Partial<HeroSettings> }).value) });
+        const row = (payload.new ?? payload.old) as { key?: string; value?: Partial<T> } | null;
+        if (row?.key === key && payload.new) {
+          setSettings({ ...defaults, ...((payload.new as { value: Partial<T> }).value) });
         }
       })
       .subscribe();
 
     return () => { active = false; supabase.removeChannel(channel); };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
 
   return { settings, loaded };
 };
+
+export const useHeroSettings = () => useSettingRow<HeroSettings>("hero", DEFAULT_HERO);
+export const useBrandingSettings = () => useSettingRow<BrandingSettings>("branding", DEFAULT_BRANDING);
