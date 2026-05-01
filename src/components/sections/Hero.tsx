@@ -128,8 +128,8 @@ export const Hero = () => {
         <canvas ref={canvasRef} className="absolute inset-0 -z-10 w-full h-full opacity-70" />
       )}
 
-      {/* Animated orbs */}
-      {effectsOn && (
+      {/* Animated colored orbs (separate toggle: color effects) */}
+      {effectsOn && colorEffectsOn && (
         <>
           <div className="absolute top-1/4 -left-32 h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-float" />
           <div className="absolute bottom-1/4 -right-32 h-[32rem] w-[32rem] rounded-full bg-accent/25 blur-3xl animate-float" style={{ animationDelay: "2s" }} />
