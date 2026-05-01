@@ -10,6 +10,7 @@ import { ArrowLeft, Loader2, Plus, Trash2, Lock, Sparkles, Pencil, X, Settings a
 import { ImageInput } from "@/components/admin/ImageInput";
 import { Switch } from "@/components/ui/switch";
 import { SiteSettingsPanel } from "@/components/admin/SiteSettingsPanel";
+import { RegistrationsPanel } from "@/components/admin/RegistrationsPanel";
 
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
 
@@ -290,6 +291,8 @@ const Admin = () => {
                 { key: "description", label: "Description", type: "textarea", required: true },
                 { key: "event_date", label: "Date & Time", type: "datetime", required: true },
                 { key: "venue", label: "Venue" },
+                { key: "fee_amount", label: "Registration fee (₹) — leave 0 for free", type: "number" },
+                { key: "payment_instructions", label: "Payment instructions (UPI ID / account / steps)", type: "textarea" },
                 { key: "image_url", label: "Image (optional)", type: "image" },
                 { key: "is_live", label: "Live now (show popup on home page)", type: "boolean", help: "Turn this on while the event is happening. A popup will appear on the home page for visitors." },
               ]}
@@ -389,27 +392,7 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="registrations">
-            <TableManager
-              password={password}
-              table="registrations"
-              fields={[
-                { key: "full_name", label: "Full name", required: true },
-                { key: "email", label: "Email", required: true },
-                { key: "phone", label: "Phone", required: true },
-              ]}
-              listRender={(r) => (
-                <div>
-                  <div className="font-semibold">{String(r.full_name)}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {String(r.email)} · {String(r.phone)}
-                    {r.branch ? ` · ${r.branch}` : ""}
-                    {r.year ? ` · ${r.year}` : ""}
-                  </div>
-                  {r.message ? <div className="text-sm mt-1 italic">"{String(r.message)}"</div> : null}
-                  <div className="text-[10px] font-mono text-muted-foreground mt-1">{fmt(r.created_at)}</div>
-                </div>
-              )}
-            />
+            <RegistrationsPanel password={password} />
           </TabsContent>
 
           <TabsContent value="settings">

@@ -73,9 +73,11 @@ export type Database = {
           created_at: string
           description: string
           event_date: string
+          fee_amount: number
           id: string
           image_url: string | null
           is_live: boolean
+          payment_instructions: string | null
           registration_open: boolean
           title: string
           venue: string | null
@@ -84,9 +86,11 @@ export type Database = {
           created_at?: string
           description: string
           event_date: string
+          fee_amount?: number
           id?: string
           image_url?: string | null
           is_live?: boolean
+          payment_instructions?: string | null
           registration_open?: boolean
           title: string
           venue?: string | null
@@ -95,9 +99,11 @@ export type Database = {
           created_at?: string
           description?: string
           event_date?: string
+          fee_amount?: number
           id?: string
           image_url?: string | null
           is_live?: boolean
+          payment_instructions?: string | null
           registration_open?: boolean
           title?: string
           venue?: string | null
@@ -130,36 +136,54 @@ export type Database = {
       }
       registrations: {
         Row: {
+          admin_notes: string | null
           branch: string | null
           created_at: string
           email: string
           event_id: string | null
+          fee_amount: number | null
           full_name: string
           id: string
           message: string | null
+          payment_method: string | null
+          payment_proof_url: string | null
+          payment_status: string
           phone: string
+          transaction_ref: string | null
           year: string | null
         }
         Insert: {
+          admin_notes?: string | null
           branch?: string | null
           created_at?: string
           email: string
           event_id?: string | null
+          fee_amount?: number | null
           full_name: string
           id?: string
           message?: string | null
+          payment_method?: string | null
+          payment_proof_url?: string | null
+          payment_status?: string
           phone: string
+          transaction_ref?: string | null
           year?: string | null
         }
         Update: {
+          admin_notes?: string | null
           branch?: string | null
           created_at?: string
           email?: string
           event_id?: string | null
+          fee_amount?: number | null
           full_name?: string
           id?: string
           message?: string | null
+          payment_method?: string | null
+          payment_proof_url?: string | null
+          payment_status?: string
           phone?: string
+          transaction_ref?: string | null
           year?: string | null
         }
         Relationships: [

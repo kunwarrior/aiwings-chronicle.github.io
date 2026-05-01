@@ -4,12 +4,15 @@ import ggctLogo from "@/assets/ggct-logo.png";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Cpu, Zap } from "lucide-react";
 import { club } from "@/data/club";
-import { useHeroSettings } from "@/hooks/useSiteSettings";
+import { useHeroSettings, useBrandingSettings } from "@/hooks/useSiteSettings";
 
 export const Hero = () => {
   const { settings } = useHeroSettings();
+  const { settings: branding } = useBrandingSettings();
   const effectsOn = settings.effects_enabled;
+  const colorEffectsOn = branding.color_effects_enabled;
   const bgImage = settings.background_image_url;
+  const heroLogo = branding.hero_logo_url || aiWingsLogo;
 
   const wordsRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
@@ -125,8 +128,8 @@ export const Hero = () => {
         <canvas ref={canvasRef} className="absolute inset-0 -z-10 w-full h-full opacity-70" />
       )}
 
-      {/* Animated orbs */}
-      {effectsOn && (
+      {/* Animated colored orbs (separate toggle: color effects) */}
+      {effectsOn && colorEffectsOn && (
         <>
           <div className="absolute top-1/4 -left-32 h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-float" />
           <div className="absolute bottom-1/4 -right-32 h-[32rem] w-[32rem] rounded-full bg-accent/25 blur-3xl animate-float" style={{ animationDelay: "2s" }} />
@@ -226,7 +229,7 @@ export const Hero = () => {
 
             {/* AI Wings logo center — BIGGER */}
             <img
-              src={aiWingsLogo}
+              src={heroLogo}
               alt="The AI Wings logo"
               className="relative z-10 w-[460px] max-w-full drop-shadow-[0_0_60px_hsl(var(--primary)/0.7)] animate-float"
               style={{ animationDelay: "1s" }}
@@ -244,7 +247,7 @@ export const Hero = () => {
 
         {/* Mobile: AI Wings big logo only (GGCT already shown in badge above) */}
         <div className="lg:hidden mt-12 flex items-center justify-center animate-fade-in">
-          <img src={aiWingsLogo} alt="The AI Wings" className="h-44 w-44 object-contain drop-shadow-[0_0_40px_hsl(var(--primary)/0.6)] animate-float" style={{ animationDelay: "1s" }} />
+          <img src={heroLogo} alt="The AI Wings" className="h-44 w-44 object-contain drop-shadow-[0_0_40px_hsl(var(--primary)/0.6)] animate-float" style={{ animationDelay: "1s" }} />
         </div>
       </div>
 

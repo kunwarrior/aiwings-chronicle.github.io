@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { Section } from "@/components/Section";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { CheckCircle2, Send } from "lucide-react";
+import { CheckCircle2, Send, IndianRupee, Upload, Loader2 } from "lucide-react";
 
 const schema = z.object({
   full_name: z.string().trim().min(2, "Name is too short").max(120),
@@ -18,26 +18,73 @@ const schema = z.object({
   year: z.string().trim().max(20).optional().or(z.literal("")),
   event_id: z.string().optional().or(z.literal("")),
   message: z.string().trim().max(1000).optional().or(z.literal("")),
+  transaction_ref: z.string().trim().max(100).optional().or(z.literal("")),
 });
 
-interface EventLite { id: string; title: string; }
+interface EventLite {
+  id: string;
+  title: string;
+  fee_amount: number | null;
+  payment_instructions: string | null;
+}
 
 export const Register = () => {
   const [events, setEvents] = useState<EventLite[]>([]);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ full_name: "", email: "", phone: "", branch: "", year: "", event_id: "", message: "" });
+  const [uploading, setUploading] = useState(false);
+  const [proofUrl, setProofUrl] = useState<string>("");
+  const [form, setForm] = useState({
+    full_name: "", email: "", phone: "", branch: "", year: "",
+    event_id: "", message: "", transaction_ref: "",
+  });
 
   useEffect(() => {
-    supabase.from("events").select("id,title").eq("registration_open", true).order("event_date", { ascending: false })
+    supabase.from("events")
+      .select("id,title,fee_amount,payment_instructions")
+      .eq("registration_open", true)
+      .order("event_date", { ascending: false })
       .then(({ data }) => setEvents((data as EventLite[]) ?? []));
   }, []);
+
+  const selectedEvent = useMemo(
+    () => events.find(e => e.id === form.event_id) ?? null,
+    [events, form.event_id]
+  );
+  const fee = Number(selectedEvent?.fee_amount ?? 0);
+  const isPaid = fee > 0;
+
+  const handleProofUpload = async (file: File) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File must be under 5 MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const path = `payment-proofs/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from("uploads").upload(path, file, { cacheControl: "3600", upsert: false });
+      if (error) throw error;
+      const { data } = supabase.storage.from("uploads").getPublicUrl(path);
+      setProofUrl(data.publicUrl);
+      toast.success("Payment screenshot uploaded");
+    } catch (e) {
+      toast.error((e as Error).message || "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
+      return;
+    }
+    if (isPaid && !proofUrl && !parsed.data.transaction_ref) {
+      toast.error("Please upload payment screenshot or enter the transaction reference");
       return;
     }
     setLoading(true);
@@ -49,6 +96,10 @@ export const Register = () => {
       year: parsed.data.year || null,
       event_id: parsed.data.event_id || null,
       message: parsed.data.message || null,
+      fee_amount: fee || 0,
+      payment_status: isPaid ? "pending" : "none",
+      transaction_ref: parsed.data.transaction_ref || null,
+      payment_proof_url: proofUrl || null,
     };
     const { error } = await supabase.from("registrations").insert(payload);
     setLoading(false);
@@ -97,7 +148,9 @@ export const Register = () => {
                 <CheckCircle2 className="h-8 w-8" />
               </div>
               <h3 className="font-display font-semibold text-2xl mb-2">You're in!</h3>
-              <p className="text-muted-foreground">We've received your request. The core team will reach out shortly.</p>
+              <p className="text-muted-foreground">
+                We've received your request{isPaid ? " and your payment is being verified" : ""}. The core team will reach out shortly.
+              </p>
             </div>
           ) : (
             <form onSubmit={submit} className="grid sm:grid-cols-2 gap-4">
@@ -132,17 +185,65 @@ export const Register = () => {
                   <Select value={form.event_id} onValueChange={(v) => setForm({ ...form, event_id: v })}>
                     <SelectTrigger><SelectValue placeholder="General club membership" /></SelectTrigger>
                     <SelectContent>
-                      {events.map(e => <SelectItem key={e.id} value={e.id}>{e.title}</SelectItem>)}
+                      {events.map(e => (
+                        <SelectItem key={e.id} value={e.id}>
+                          {e.title}{Number(e.fee_amount) > 0 ? ` · ₹${e.fee_amount}` : " · Free"}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               )}
+
+              {isPaid && (
+                <div className="sm:col-span-2 rounded-xl border border-primary/40 bg-primary/5 p-4 space-y-3">
+                  <div className="flex items-center gap-2 text-primary">
+                    <IndianRupee className="h-4 w-4" />
+                    <span className="font-display font-semibold">Payment required: ₹{fee}</span>
+                  </div>
+                  {selectedEvent?.payment_instructions && (
+                    <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {selectedEvent.payment_instructions}
+                    </div>
+                  )}
+                  <div>
+                    <Label>Transaction / UPI Reference *</Label>
+                    <Input
+                      value={form.transaction_ref}
+                      onChange={(e) => setForm({ ...form, transaction_ref: e.target.value })}
+                      placeholder="e.g. UPI ref, txn ID"
+                    />
+                  </div>
+                  <div>
+                    <Label>Upload payment screenshot</Label>
+                    <div className="mt-1 flex items-center gap-3">
+                      <label className="flex items-center gap-2 cursor-pointer rounded-md border border-input bg-background px-3 py-2 text-sm hover:border-primary transition-colors">
+                        {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                        {proofUrl ? "Replace screenshot" : "Choose image"}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => e.target.files?.[0] && handleProofUpload(e.target.files[0])}
+                        />
+                      </label>
+                      {proofUrl && (
+                        <a href={proofUrl} target="_blank" rel="noreferrer" className="text-xs text-primary underline">
+                          View uploaded
+                        </a>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-1">PNG/JPG, up to 5 MB. Provide either screenshot or transaction reference.</p>
+                  </div>
+                </div>
+              )}
+
               <div className="sm:col-span-2">
                 <Label>Why do you want to join?</Label>
                 <Textarea rows={3} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="Tell us a little about your interest in AI…" />
               </div>
               <div className="sm:col-span-2">
-                <Button type="submit" disabled={loading} className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+                <Button type="submit" disabled={loading || uploading} className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
                   {loading ? "Submitting…" : <>Send Application <Send className="ml-2 h-4 w-4" /></>}
                 </Button>
               </div>
