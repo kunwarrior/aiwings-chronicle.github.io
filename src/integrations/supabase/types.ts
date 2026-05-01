@@ -73,9 +73,11 @@ export type Database = {
           created_at: string
           description: string
           event_date: string
+          fee_amount: number
           id: string
           image_url: string | null
           is_live: boolean
+          payment_instructions: string | null
           registration_open: boolean
           title: string
           venue: string | null
@@ -84,9 +86,11 @@ export type Database = {
           created_at?: string
           description: string
           event_date: string
+          fee_amount?: number
           id?: string
           image_url?: string | null
           is_live?: boolean
+          payment_instructions?: string | null
           registration_open?: boolean
           title: string
           venue?: string | null
@@ -95,9 +99,11 @@ export type Database = {
           created_at?: string
           description?: string
           event_date?: string
+          fee_amount?: number
           id?: string
           image_url?: string | null
           is_live?: boolean
+          payment_instructions?: string | null
           registration_open?: boolean
           title?: string
           venue?: string | null
