@@ -247,7 +247,7 @@ export const Hero = () => {
 
         {/* Mobile: AI Wings big logo only (GGCT already shown in badge above) */}
         <div className="lg:hidden mt-12 flex items-center justify-center animate-fade-in">
-          <img src={aiWingsLogo} alt="The AI Wings" className="h-44 w-44 object-contain drop-shadow-[0_0_40px_hsl(var(--primary)/0.6)] animate-float" style={{ animationDelay: "1s" }} />
+          <img src={heroLogo} alt="The AI Wings" className="h-44 w-44 object-contain drop-shadow-[0_0_40px_hsl(var(--primary)/0.6)] animate-float" style={{ animationDelay: "1s" }} />
         </div>
       </div>
 
