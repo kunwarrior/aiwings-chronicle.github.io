@@ -78,10 +78,17 @@ export const Members = () => {
   const leaders = team.filter(t => normalizeCategory(t.category) === "leader");
   const members = team.filter(t => normalizeCategory(t.category) === "member");
 
-  const useFallback = loaded && team.length === 0;
-  const showFaculty = useFallback ? club.hod.map((h, i) => ({ id: `f${i}`, full_name: h.name, role: h.role, category: "faculty", branch: null, year: null, image_url: null, sort_order: i })) : faculty;
-  const showLeaders = useFallback ? club.leaders.map((l, i) => ({ id: `l${i}`, full_name: l.name, role: l.role, category: "leader", branch: null, year: null, image_url: null, sort_order: i })) : leaders;
-  const showMembers = useFallback ? club.members.map((m, i) => ({ id: `m${i}`, full_name: m.name, role: m.role, category: "member", branch: null, year: null, image_url: null, sort_order: i })) : members;
+  // Per-section fallback: only use seed data when that specific section is empty.
+  // Otherwise, the moment an admin adds even one Leader, Faculty/Members would also vanish.
+  const showFaculty = loaded && faculty.length === 0
+    ? club.hod.map((h, i) => ({ id: `f${i}`, full_name: h.name, role: h.role, category: "faculty", branch: null, year: null, image_url: null, sort_order: i }))
+    : faculty;
+  const showLeaders = loaded && leaders.length === 0
+    ? club.leaders.map((l, i) => ({ id: `l${i}`, full_name: l.name, role: l.role, category: "leader", branch: null, year: null, image_url: null, sort_order: i }))
+    : leaders;
+  const showMembers = loaded && members.length === 0
+    ? club.members.map((m, i) => ({ id: `m${i}`, full_name: m.name, role: m.role, category: "member", branch: null, year: null, image_url: null, sort_order: i }))
+    : members;
 
   return (
     <Section
