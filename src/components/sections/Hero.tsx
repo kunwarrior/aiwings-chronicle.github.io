@@ -129,11 +129,11 @@ export const Hero = () => {
       )}
 
       {/* Animated colored orbs (separate toggle: color effects) */}
-      {effectsOn && colorEffectsOn && (
+      {colorEffectsOn && (
         <>
-          <div className="absolute top-1/4 -left-32 h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-float" />
-          <div className="absolute bottom-1/4 -right-32 h-[32rem] w-[32rem] rounded-full bg-accent/25 blur-3xl animate-float" style={{ animationDelay: "2s" }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-primary/10 blur-3xl animate-pulse-glow" />
+          {effectsOn && <div className="absolute top-1/4 -left-32 h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-float" />}
+          {effectsOn && <div className="absolute bottom-1/4 -right-32 h-[32rem] w-[32rem] rounded-full bg-accent/25 blur-3xl animate-float" style={{ animationDelay: "2s" }} />}
+          {effectsOn && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-primary/10 blur-3xl animate-pulse-glow" />}
         </>
       )}
 
@@ -197,10 +197,12 @@ export const Hero = () => {
 
           {/* AI Wings logo showcase — rings only, no GGCT badge */}
           <div ref={logoRef} className="relative hidden lg:flex items-center justify-center transition-transform duration-300 ease-out animate-fade-in min-h-[560px]" style={{ animationDelay: "0.2s" }}>
-            {/* Glow */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-pulse-glow" />
-            </div>
+          {/* Glow — gated by color effects toggle */}
+            {colorEffectsOn && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-pulse-glow" />
+              </div>
+            )}
 
             {effectsOn && (
               <>
