@@ -21,6 +21,8 @@ const DEFAULT_BRANDING: BrandingSettings = {
   color_effects_enabled: true,
 };
 
+let channelCounter = 0;
+
 const useSettingRow = <T extends object>(key: string, defaults: T) => {
   const [settings, setSettings] = useState<T>(defaults);
   const [loaded, setLoaded] = useState(false);
@@ -39,17 +41,24 @@ const useSettingRow = <T extends object>(key: string, defaults: T) => {
       if (active) setLoaded(true);
     })();
 
-    const channel = supabase
-      .channel(`site_settings_${key}_${Math.random().toString(36).slice(2)}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "site_settings" }, (payload) => {
-        const row = (payload.new ?? payload.old) as { key?: string; value?: Partial<T> } | null;
-        if (row?.key === key && payload.new) {
-          setSettings({ ...defaults, ...((payload.new as { value: Partial<T> }).value) });
+    const topic = `site_settings_${key}_${++channelCounter}_${Date.now()}`;
+    const channel = supabase.channel(topic);
+    channel.on(
+      "postgres_changes" as never,
+      { event: "*", schema: "public", table: "site_settings" },
+      (payload: { new: { key?: string; value?: Partial<T> } | null; old: unknown }) => {
+        const row = payload.new;
+        if (row?.key === key && row.value) {
+          setSettings({ ...defaults, ...row.value });
         }
-      })
-      .subscribe();
+      }
+    );
+    channel.subscribe();
 
-    return () => { active = false; supabase.removeChannel(channel); };
+    return () => {
+      active = false;
+      supabase.removeChannel(channel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
