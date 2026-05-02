@@ -21,11 +21,19 @@ interface TeamMember {
 }
 
 // Normalize whatever was stored (handles "Faculty", "HOD", "leaders", " Member ", etc.)
-const normalizeCategory = (c: string): "faculty" | "leader" | "member" => {
+const normalizeCategory = (c: string): "hod" | "faculty" | "leader" | "member" => {
   const v = (c ?? "").trim().toLowerCase();
-  if (["faculty", "hod", "mentor", "professor", "teacher"].includes(v)) return "faculty";
+  if (v === "hod") return "hod";
+  if (["faculty", "mentor", "professor", "teacher"].includes(v)) return "faculty";
   if (["leader", "leaders", "core", "core team", "president", "secretary", "lead"].includes(v)) return "leader";
   return "member";
+};
+
+// HOD detection: either category=="hod" OR role text contains "hod" / "head of department"
+const isHodMember = (m: { category: string; role: string }) => {
+  if (normalizeCategory(m.category) === "hod") return true;
+  const r = (m.role ?? "").toLowerCase();
+  return /\bhod\b/.test(r) || r.includes("head of department");
 };
 
 const SocialLinks = ({ linkedin, instagram }: { linkedin?: string | null; instagram?: string | null }) => {
