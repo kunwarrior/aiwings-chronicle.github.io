@@ -197,10 +197,12 @@ export const Hero = () => {
 
           {/* AI Wings logo showcase — rings only, no GGCT badge */}
           <div ref={logoRef} className="relative hidden lg:flex items-center justify-center transition-transform duration-300 ease-out animate-fade-in min-h-[560px]" style={{ animationDelay: "0.2s" }}>
-            {/* Glow */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-pulse-glow" />
-            </div>
+          {/* Glow — gated by color effects toggle */}
+            {colorEffectsOn && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-pulse-glow" />
+              </div>
+            )}
 
             {effectsOn && (
               <>
