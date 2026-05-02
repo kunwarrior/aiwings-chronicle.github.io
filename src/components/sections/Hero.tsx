@@ -129,11 +129,11 @@ export const Hero = () => {
       )}
 
       {/* Animated colored orbs (separate toggle: color effects) */}
-      {effectsOn && colorEffectsOn && (
+      {colorEffectsOn && (
         <>
-          <div className="absolute top-1/4 -left-32 h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-float" />
-          <div className="absolute bottom-1/4 -right-32 h-[32rem] w-[32rem] rounded-full bg-accent/25 blur-3xl animate-float" style={{ animationDelay: "2s" }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-primary/10 blur-3xl animate-pulse-glow" />
+          {effectsOn && <div className="absolute top-1/4 -left-32 h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-float" />}
+          {effectsOn && <div className="absolute bottom-1/4 -right-32 h-[32rem] w-[32rem] rounded-full bg-accent/25 blur-3xl animate-float" style={{ animationDelay: "2s" }} />}
+          {effectsOn && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-primary/10 blur-3xl animate-pulse-glow" />}
         </>
       )}
 
