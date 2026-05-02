@@ -40,7 +40,7 @@ const useSettingRow = <T extends object>(key: string, defaults: T) => {
     })();
 
     const channel = supabase
-      .channel(`site_settings_${key}`)
+      .channel(`site_settings_${key}_${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "site_settings" }, (payload) => {
         const row = (payload.new ?? payload.old) as { key?: string; value?: Partial<T> } | null;
         if (row?.key === key && payload.new) {
