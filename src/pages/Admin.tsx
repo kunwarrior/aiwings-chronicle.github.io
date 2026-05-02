@@ -321,7 +321,8 @@ const Admin = () => {
                 { key: "full_name", label: "Full name", required: true },
                 { key: "role", label: "Role / Title (e.g. HOD, President, Secretary)", required: true },
                 { key: "category", label: "Category", type: "select", required: true, options: [
-                  { value: "faculty", label: "Faculty / HOD" },
+                  { value: "hod", label: "HOD (Head of Department) — featured" },
+                  { value: "faculty", label: "Faculty / Mentor" },
                   { value: "leader", label: "Core Team / Leader" },
                   { value: "member", label: "Member" },
                 ] },
