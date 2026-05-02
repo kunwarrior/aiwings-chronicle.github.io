@@ -21,11 +21,19 @@ interface TeamMember {
 }
 
 // Normalize whatever was stored (handles "Faculty", "HOD", "leaders", " Member ", etc.)
-const normalizeCategory = (c: string): "faculty" | "leader" | "member" => {
+const normalizeCategory = (c: string): "hod" | "faculty" | "leader" | "member" => {
   const v = (c ?? "").trim().toLowerCase();
-  if (["faculty", "hod", "mentor", "professor", "teacher"].includes(v)) return "faculty";
+  if (v === "hod") return "hod";
+  if (["faculty", "mentor", "professor", "teacher"].includes(v)) return "faculty";
   if (["leader", "leaders", "core", "core team", "president", "secretary", "lead"].includes(v)) return "leader";
   return "member";
+};
+
+// HOD detection: either category=="hod" OR role text contains "hod" / "head of department"
+const isHodMember = (m: { category: string; role: string }) => {
+  if (normalizeCategory(m.category) === "hod") return true;
+  const r = (m.role ?? "").toLowerCase();
+  return /\bhod\b/.test(r) || r.includes("head of department");
 };
 
 const SocialLinks = ({ linkedin, instagram }: { linkedin?: string | null; instagram?: string | null }) => {
@@ -74,14 +82,21 @@ export const Members = () => {
     })();
   }, []);
 
-  const faculty = team.filter(t => normalizeCategory(t.category) === "faculty");
-  const leaders = team.filter(t => normalizeCategory(t.category) === "leader");
-  const members = team.filter(t => normalizeCategory(t.category) === "member");
+  // HOD = anyone whose category is "hod" OR whose role mentions HOD/Head of Department
+  const hods = team.filter(isHodMember);
+  const hodIds = new Set(hods.map(h => h.id));
+  const faculty = team.filter(t => !hodIds.has(t.id) && (normalizeCategory(t.category) === "faculty" || normalizeCategory(t.category) === "hod"));
+  const leaders = team.filter(t => !hodIds.has(t.id) && normalizeCategory(t.category) === "leader");
+  const members = team.filter(t => !hodIds.has(t.id) && normalizeCategory(t.category) === "member");
 
   // Per-section fallback: only use seed data when that specific section is empty.
-  // Otherwise, the moment an admin adds even one Leader, Faculty/Members would also vanish.
+  const seedHod = club.hod.filter(h => /\bhod\b/i.test(h.role) || /head of department/i.test(h.role));
+  const seedFacultyOnly = club.hod.filter(h => !(/\bhod\b/i.test(h.role) || /head of department/i.test(h.role)));
+  const showHods = loaded && hods.length === 0
+    ? seedHod.map((h, i) => ({ id: `h${i}`, full_name: h.name, role: h.role, category: "hod", branch: null, year: null, image_url: null, sort_order: i }))
+    : hods;
   const showFaculty = loaded && faculty.length === 0
-    ? club.hod.map((h, i) => ({ id: `f${i}`, full_name: h.name, role: h.role, category: "faculty", branch: null, year: null, image_url: null, sort_order: i }))
+    ? seedFacultyOnly.map((h, i) => ({ id: `f${i}`, full_name: h.name, role: h.role, category: "faculty", branch: null, year: null, image_url: null, sort_order: i }))
     : faculty;
   const showLeaders = loaded && leaders.length === 0
     ? club.leaders.map((l, i) => ({ id: `l${i}`, full_name: l.name, role: l.role, category: "leader", branch: null, year: null, image_url: null, sort_order: i }))
@@ -95,11 +110,40 @@ export const Members = () => {
       id="members"
       eyebrow="Faculty & Team"
       title={<>The minds behind <span className="text-gradient">The AI Wings</span></>}
-      description="From faculty mentors to student leaders and curious members — meet the people that make this club take flight."
+      description="From our HOD and faculty mentors to student leaders and curious members — meet the people that make this club take flight."
     >
+      {/* HOD — prominent featured cards */}
+      {showHods.length > 0 && (
+        <div ref={ref} className="scroll-fade mb-10">
+          <div className="text-xs font-mono uppercase tracking-[0.2em] text-primary mb-4 flex items-center gap-2">
+            <Crown className="h-3.5 w-3.5" /> Head of Department
+          </div>
+          <div className={`grid gap-5 ${showHods.length === 1 ? "md:grid-cols-1 max-w-2xl" : "md:grid-cols-2"}`}>
+            {showHods.map((h) => (
+              <div key={h.id} className="relative rounded-2xl p-6 bg-gradient-card border-2 border-primary/40 flex items-center gap-5 hover:shadow-glow transition-all overflow-hidden">
+                <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-primary/15 blur-2xl" />
+                <SocialLinks linkedin={(h as TeamMember).linkedin_url} instagram={(h as TeamMember).instagram_url} />
+                {h.image_url ? (
+                  <img src={h.image_url} alt={h.full_name} className="h-28 w-28 rounded-2xl object-cover shadow-glow shrink-0 relative" />
+                ) : (
+                  <div className="h-28 w-28 rounded-2xl bg-gradient-primary text-primary-foreground flex items-center justify-center font-display font-bold text-3xl shadow-glow shrink-0 relative">
+                    {initials(h.full_name)}
+                  </div>
+                )}
+                <div className="min-w-0 relative">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-primary flex items-center gap-1.5"><Crown className="h-3 w-3" /> HOD</div>
+                  <div className="font-display font-bold text-xl break-words">{h.full_name}</div>
+                  <div className="text-sm text-muted-foreground">{h.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Faculty */}
       {showFaculty.length > 0 && (
-        <div ref={ref} className="scroll-fade grid md:grid-cols-2 gap-5 mb-12">
+        <div className="scroll-fade grid md:grid-cols-2 gap-5 mb-12">
           {showFaculty.map((h) => (
             <div key={h.id} className="relative rounded-2xl p-6 bg-gradient-card border border-border flex items-center gap-5 hover:border-primary/50 hover:shadow-glow transition-all">
               <SocialLinks linkedin={(h as TeamMember).linkedin_url} instagram={(h as TeamMember).instagram_url} />
@@ -112,7 +156,7 @@ export const Members = () => {
               )}
               <div className="min-w-0">
                 <div className="text-[10px] font-mono uppercase tracking-wider text-primary flex items-center gap-1.5"><Crown className="h-3 w-3" /> Faculty</div>
-                <div className="font-display font-semibold text-lg">{h.full_name}</div>
+                <div className="font-display font-semibold text-lg break-words">{h.full_name}</div>
                 <div className="text-sm text-muted-foreground">{h.role}</div>
               </div>
             </div>
