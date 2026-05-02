@@ -44,8 +44,7 @@ const useSettingRow = <T extends object>(key: string, defaults: T) => {
     const topic = `site_settings_${key}_${++channelCounter}_${Date.now()}`;
     const channel = supabase.channel(topic);
     channel.on(
-      // @ts-expect-error - postgres_changes string literal
-      "postgres_changes",
+      "postgres_changes" as never,
       { event: "*", schema: "public", table: "site_settings" },
       (payload: { new: { key?: string; value?: Partial<T> } | null; old: unknown }) => {
         const row = payload.new;
