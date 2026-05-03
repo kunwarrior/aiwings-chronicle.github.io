@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { BrandingApplier } from "@/components/BrandingApplier";
 import Index from "./pages/Index.tsx";
 import Admin from "./pages/Admin.tsx";
+import EventDetail from "./pages/EventDetail.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/event/:id" element={<EventDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
