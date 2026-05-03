@@ -71,6 +71,7 @@ export type Database = {
       events: {
         Row: {
           created_at: string
+          custom_questions: Json
           description: string
           event_date: string
           fee_amount: number
@@ -78,12 +79,15 @@ export type Database = {
           image_url: string | null
           is_live: boolean
           payment_instructions: string | null
+          payment_qr_url: string | null
           registration_open: boolean
+          required_fields: Json
           title: string
           venue: string | null
         }
         Insert: {
           created_at?: string
+          custom_questions?: Json
           description: string
           event_date: string
           fee_amount?: number
@@ -91,12 +95,15 @@ export type Database = {
           image_url?: string | null
           is_live?: boolean
           payment_instructions?: string | null
+          payment_qr_url?: string | null
           registration_open?: boolean
+          required_fields?: Json
           title: string
           venue?: string | null
         }
         Update: {
           created_at?: string
+          custom_questions?: Json
           description?: string
           event_date?: string
           fee_amount?: number
@@ -104,7 +111,9 @@ export type Database = {
           image_url?: string | null
           is_live?: boolean
           payment_instructions?: string | null
+          payment_qr_url?: string | null
           registration_open?: boolean
+          required_fields?: Json
           title?: string
           venue?: string | null
         }
@@ -139,6 +148,7 @@ export type Database = {
           admin_notes: string | null
           branch: string | null
           created_at: string
+          custom_responses: Json
           email: string
           event_id: string | null
           fee_amount: number | null
@@ -156,6 +166,7 @@ export type Database = {
           admin_notes?: string | null
           branch?: string | null
           created_at?: string
+          custom_responses?: Json
           email: string
           event_id?: string | null
           fee_amount?: number | null
@@ -173,6 +184,7 @@ export type Database = {
           admin_notes?: string | null
           branch?: string | null
           created_at?: string
+          custom_responses?: Json
           email?: string
           event_id?: string | null
           fee_amount?: number | null
