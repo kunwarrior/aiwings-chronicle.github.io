@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -92,7 +93,7 @@ export const LiveEventPopup = () => {
           <DialogFooter className="mt-6 gap-2 sm:gap-2">
             <Button variant="outline" onClick={dismiss}>Maybe later</Button>
             <Button asChild className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
-              <a href="#register" onClick={dismiss}>Join now</a>
+              <Link to={event ? `/event/${event.id}` : "/#events"} onClick={dismiss}>Register now</Link>
             </Button>
           </DialogFooter>
         </div>

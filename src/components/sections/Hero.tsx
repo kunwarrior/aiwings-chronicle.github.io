@@ -165,9 +165,9 @@ export const Hero = () => {
 
             <div className="flex flex-wrap gap-3 justify-center lg:justify-start animate-fade-in-up" style={{ animationDelay: "0.3s", opacity: 0 }}>
               <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow group text-base px-7 py-6">
-                <a href="#register">
+                <a href="#events">
                   <Zap className="mr-2 h-4 w-4" />
-                  Join the Club
+                  See Events
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </a>
               </Button>

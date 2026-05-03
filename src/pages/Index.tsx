@@ -6,7 +6,7 @@ import { Activities } from "@/components/sections/Activities";
 import { Events } from "@/components/sections/Events";
 import { Achievements } from "@/components/sections/Achievements";
 import { Gallery } from "@/components/sections/Gallery";
-import { Register } from "@/components/sections/Register";
+
 import { Contact } from "@/components/sections/Contact";
 import { Footer } from "@/components/Footer";
 import { LiveEventPopup } from "@/components/LiveEventPopup";
@@ -22,7 +22,6 @@ const Index = () => {
       <Events />
       <Achievements />
       <Gallery />
-      <Register />
       <Contact />
       <Footer />
       <LiveEventPopup />
