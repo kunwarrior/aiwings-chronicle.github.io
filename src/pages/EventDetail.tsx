@@ -58,7 +58,7 @@ const EventDetail = () => {
   useEffect(() => {
     if (!id) return;
     supabase.from("events").select("*").eq("id", id).maybeSingle()
-      .then(({ data }) => setEvent((data as EventRow | null) ?? null));
+      .then(({ data }) => setEvent((data as unknown as EventRow | null) ?? null));
   }, [id]);
 
   const required: RequiredFields = useMemo(() => ({
