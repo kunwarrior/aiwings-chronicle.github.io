@@ -107,7 +107,7 @@ export const Navbar = () => {
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
             <Button asChild size="sm" className="hidden md:inline-flex bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
-              <a href="#register">Join Us</a>
+              <a href="#events">Join an Event</a>
             </Button>
             <Link to="/admin" className="hidden md:block text-xs text-muted-foreground hover:text-primary transition-colors font-mono">
               admin
