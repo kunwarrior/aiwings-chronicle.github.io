@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Section } from "@/components/Section";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { club } from "@/data/club";
 import { supabase } from "@/integrations/supabase/client";
 import { Crown, Sparkles, Linkedin, Instagram } from "lucide-react";
@@ -67,7 +66,6 @@ const SocialLinks = ({ linkedin, instagram }: { linkedin?: string | null; instag
 };
 
 export const Members = () => {
-  const ref = useScrollReveal<HTMLDivElement>();
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -129,7 +127,7 @@ export const Members = () => {
     >
       {/* HOD — prominent featured cards */}
       {showHods.length > 0 && (
-        <div ref={ref} className="scroll-fade mb-10">
+        <div className="mb-10">
           <div className="text-xs font-mono uppercase tracking-[0.2em] text-primary mb-4 flex items-center gap-2">
             <Crown className="h-3.5 w-3.5" /> Head of Department
           </div>
@@ -158,7 +156,7 @@ export const Members = () => {
 
       {/* Faculty */}
       {showFaculty.length > 0 && (
-        <div className="scroll-fade grid md:grid-cols-2 gap-5 mb-12">
+        <div className="grid md:grid-cols-2 gap-5 mb-12">
           {showFaculty.map((h) => (
             <div key={h.id} className="relative rounded-2xl p-6 bg-gradient-card border border-border flex items-center gap-5 hover:border-primary/50 hover:shadow-glow transition-all">
               <SocialLinks linkedin={(h as TeamMember).linkedin_url} instagram={(h as TeamMember).instagram_url} />
