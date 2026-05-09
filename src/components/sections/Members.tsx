@@ -105,9 +105,7 @@ export const Members = () => {
   // Per-section fallback: only use seed data when that specific section is empty.
   const seedHod = club.hod.filter(h => /\bhod\b/i.test(h.role) || /head of department/i.test(h.role));
   const seedFacultyOnly = club.hod.filter(h => !(/\bhod\b/i.test(h.role) || /head of department/i.test(h.role)));
-  const showHods = loaded && hods.length === 0
-    ? seedHod.map((h, i) => ({ id: `h${i}`, full_name: h.name, role: h.role, category: "hod", branch: null, year: null, image_url: null, sort_order: i }))
-    : hods;
+  const showHods = hods;
   const showFaculty = loaded && faculty.length === 0
     ? seedFacultyOnly.map((h, i) => ({ id: `f${i}`, full_name: h.name, role: h.role, category: "faculty", branch: null, year: null, image_url: null, sort_order: i }))
     : faculty;
