@@ -71,15 +71,30 @@ export const Members = () => {
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loaded, setLoaded] = useState(false);
 
+  const fetchTeam = async () => {
+    const { data, error } = await supabase
+      .from("team_members")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    if (error) console.error("[Members] fetch error", error);
+    setTeam((data ?? []) as TeamMember[]);
+    setLoaded(true);
+  };
+
   useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("team_members")
-        .select("*")
-        .order("sort_order", { ascending: true });
-      setTeam((data ?? []) as TeamMember[]);
-      setLoaded(true);
-    })();
+    fetchTeam();
+    const onFocus = () => fetchTeam();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    const channel = supabase
+      .channel("team_members_live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "team_members" }, () => fetchTeam())
+      .subscribe();
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // HOD = anyone whose category is "hod" OR whose role mentions HOD/Head of Department
