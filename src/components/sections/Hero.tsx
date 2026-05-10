@@ -138,21 +138,7 @@ export const Hero = () => {
       )}
 
       <div className="container-x relative">
-        {/* College badge with BIG logo */}
-        <div className="flex justify-center mb-8 animate-fade-in">
-          <div className="inline-flex items-center gap-4 pl-3 pr-6 py-3 rounded-full glass backdrop-blur-xl shadow-glow">
-            <div className="relative h-14 w-14 shrink-0">
-              <img src={ggctLogo} alt="GGCT" className="h-full w-full object-contain drop-shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />
-            </div>
-            <div className="text-left leading-tight">
-              <div className="text-sm md:text-base font-display font-bold uppercase tracking-[0.18em] text-gradient">Official AI Club</div>
-              <div className="text-xs md:text-sm font-semibold text-muted-foreground">{club.college}</div>
-            </div>
-            <span className="h-2.5 w-2.5 rounded-full bg-primary animate-neural-pulse" />
-          </div>
-        </div>
-
-        <div className="grid lg:grid-cols-[1.1fr_1fr] gap-10 items-center">
+        {/* Hero heading and content */}
           <div ref={wordsRef} className="transition-transform duration-300 ease-out text-center lg:text-left">
             <h1 className="font-display font-bold text-6xl md:text-7xl lg:text-[7.5rem] leading-[0.9] mb-6 animate-fade-in-up">
               <span className="block text-foreground/90">The</span>
