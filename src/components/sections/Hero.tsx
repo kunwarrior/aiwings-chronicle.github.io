@@ -139,6 +139,7 @@ export const Hero = () => {
 
       <div className="container-x relative">
         {/* Hero heading and content */}
+        <div className="grid lg:grid-cols-[1.1fr_1fr] gap-10 items-center">
           <div ref={wordsRef} className="transition-transform duration-300 ease-out text-center lg:text-left">
             <h1 className="font-display font-bold text-6xl md:text-7xl lg:text-[7.5rem] leading-[0.9] mb-6 animate-fade-in-up">
               <span className="block text-foreground/90">The</span>
@@ -233,7 +234,7 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* Mobile: AI Wings big logo only (GGCT already shown in badge above) */}
+        {/* Mobile: AI Wings big logo only */}
         <div className="lg:hidden mt-12 flex items-center justify-center animate-fade-in">
           <img src={heroLogo} alt="The AI Wings" className="h-44 w-44 object-contain drop-shadow-[0_0_40px_hsl(var(--primary)/0.6)] animate-float" style={{ animationDelay: "1s" }} />
         </div>
