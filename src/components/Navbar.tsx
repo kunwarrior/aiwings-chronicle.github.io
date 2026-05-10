@@ -4,8 +4,6 @@ import { useTheme, ACCENT_LIST } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import aiWingsLogo from "@/assets/aiwings-logo.png";
-import ggctLogo from "@/assets/ggct-logo.png";
 
 const NAV = [
   { id: "about", label: "About" },
