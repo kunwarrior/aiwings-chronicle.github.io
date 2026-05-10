@@ -4,6 +4,8 @@ import { useTheme, ACCENT_LIST } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import aiWingsLogo from "@/assets/aiwings-logo.png";
+import ggctLogo from "@/assets/ggct-logo.png";
 
 const NAV = [
   { id: "about", label: "About" },
@@ -53,8 +55,16 @@ export const Navbar = () => {
           )}
         >
           <a href="#top" className="flex items-center gap-3 group">
-            <div className="leading-tight">
-              <div className="font-display font-bold text-xl tracking-wide">The AI Wings</div>
+            <div className="relative h-14 w-14 shrink-0 group-hover:scale-105 transition-transform">
+              <img src={ggctLogo} alt="Gyan Ganga College of Technology" className="h-full w-full object-contain drop-shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />
+            </div>
+            <div className="relative h-11 w-11 rounded-xl bg-background/40 backdrop-blur ring-1 ring-primary/30 shadow-glow flex items-center justify-center overflow-hidden group-hover:ring-primary/60 transition-all">
+              <img src={aiWingsLogo} alt="The AI Wings" className="h-10 w-10 object-contain" />
+              <div className="absolute inset-0 animate-shimmer bg-[linear-gradient(110deg,transparent,hsl(var(--primary)/.15),transparent)] bg-[length:200%_100%]" />
+            </div>
+            <div className="leading-tight hidden sm:block">
+              <div className="font-display font-bold text-base">The AI Wings</div>
+              <div className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Gyan Ganga · GGCT</div>
             </div>
           </a>
 
