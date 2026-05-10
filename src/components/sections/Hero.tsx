@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import aiWingsLogo from "@/assets/aiwings-logo.png";
+import ggctLogo from "@/assets/ggct-logo.png";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Cpu, Zap } from "lucide-react";
 import { club } from "@/data/club";
