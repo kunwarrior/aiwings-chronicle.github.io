@@ -138,7 +138,19 @@ export const Hero = () => {
       )}
 
       <div className="container-x relative">
-        {/* Hero heading and content */}
+        {/* College badge — wider, no Official AI Club */}
+        <div className="flex justify-center mb-8 animate-fade-in">
+          <div className="inline-flex items-center gap-5 pl-5 pr-8 py-4 rounded-full glass backdrop-blur-xl shadow-glow">
+            <div className="relative h-16 w-16 shrink-0">
+              <img src={ggctLogo} alt="GGCT" className="h-full w-full object-contain drop-shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />
+            </div>
+            <div className="text-left leading-tight">
+              <div className="text-sm md:text-lg font-display font-semibold text-muted-foreground">{club.college}</div>
+            </div>
+            <span className="h-2.5 w-2.5 rounded-full bg-primary animate-neural-pulse" />
+          </div>
+        </div>
+
         <div className="grid lg:grid-cols-[1.1fr_1fr] gap-10 items-center">
           <div ref={wordsRef} className="transition-transform duration-300 ease-out text-center lg:text-left">
             <h1 className="font-display font-bold text-6xl md:text-7xl lg:text-[7.5rem] leading-[0.9] mb-6 animate-fade-in-up">
