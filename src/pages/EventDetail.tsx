@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
+import type { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { ArrowLeft, Calendar, MapPin, IndianRupee, Upload, Loader2, CheckCircle2, X, Send } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, IndianRupee, Upload, Loader2, CheckCircle2, X, Send, ShieldCheck, LogOut } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 
@@ -47,6 +49,10 @@ const DEFAULT_REQ: RequiredFields = { full_name: true, email: true, phone: true 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<EventRow | null | undefined>(undefined);
+  const [user, setUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
+  const [alreadyRegistered, setAlreadyRegistered] = useState(false);
   const [lightbox, setLightbox] = useState(false);
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -61,6 +67,35 @@ const EventDetail = () => {
       .then(({ data }) => setEvent((data as unknown as EventRow | null) ?? null));
   }, [id]);
 
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null);
+      setAuthReady(true);
+    });
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
+      setAuthReady(true);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  // Prefill from Google profile
+  useEffect(() => {
+    if (!user) return;
+    setForm((f) => ({
+      ...f,
+      full_name: f.full_name || (user.user_metadata?.full_name as string) || (user.user_metadata?.name as string) || "",
+      email: user.email ?? f.email ?? "",
+    }));
+  }, [user]);
+
+  // Check duplicate registration
+  useEffect(() => {
+    if (!user || !id) { setAlreadyRegistered(false); return; }
+    supabase.from("registrations").select("id").eq("event_id", id).eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => setAlreadyRegistered(!!data));
+  }, [user, id, done]);
+
   const required: RequiredFields = useMemo(() => ({
     ...DEFAULT_REQ,
     ...(event?.required_fields ?? {}),
@@ -73,6 +108,20 @@ const EventDetail = () => {
 
   const fee = Number(event?.fee_amount ?? 0);
   const isPaid = fee > 0;
+
+  const signInGoogle = async () => {
+    setSigningIn(true);
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.href });
+    if (result.error) {
+      setSigningIn(false);
+      toast.error("Google sign-in failed. Please try again.");
+    }
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    toast.success("Signed out");
+  };
 
   const handleProofUpload = async (file: File) => {
     if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return; }
@@ -93,20 +142,18 @@ const EventDetail = () => {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!event) return;
+    if (!event || !user) return;
 
-    // Validate built-in fields
     const fn = v("full_name");
     if (!fn || fn.length < 2) return toast.error("Please enter your full name");
-    const email = v("email");
-    if (required.email !== false && !/^\S+@\S+\.\S+$/.test(email)) return toast.error("Enter a valid email");
+    const email = (user.email ?? "").trim();
+    if (!email) return toast.error("Your account has no email");
     const phone = v("phone");
     if (required.phone !== false && phone.length < 7) return toast.error("Enter a valid phone");
     if (required.branch && !v("branch")) return toast.error("Branch is required");
     if (required.year && !v("year")) return toast.error("Year is required");
     if (required.message && !v("message")) return toast.error("Message is required");
 
-    // Validate custom questions
     for (const q of questions) {
       if (q.required && !(answers[q.id] ?? "").trim()) {
         return toast.error(`Please answer: ${q.label}`);
@@ -119,8 +166,9 @@ const EventDetail = () => {
 
     setSubmitting(true);
     const payload = {
+      user_id: user.id,
       full_name: fn,
-      email: email || `noemail-${Date.now()}@noemail.local`,
+      email,
       phone: phone || "0000000",
       branch: v("branch") || null,
       year: v("year") || null,
@@ -134,7 +182,15 @@ const EventDetail = () => {
     };
     const { error } = await supabase.from("registrations").insert(payload);
     setSubmitting(false);
-    if (error) { toast.error("Could not submit. Please try again."); return; }
+    if (error) {
+      if (/duplicate|unique/i.test(error.message)) {
+        setAlreadyRegistered(true);
+        toast.error("You are already registered for this event");
+      } else {
+        toast.error("Could not submit. Please try again.");
+      }
+      return;
+    }
     setDone(true);
     toast.success("Registration submitted!");
   };
@@ -163,6 +219,198 @@ const EventDetail = () => {
       </main>
     );
   }
+
+  const renderRegistrationArea = () => {
+    if (!event.registration_open) {
+      return (
+        <div className="rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
+          Registrations for this event are currently closed.
+        </div>
+      );
+    }
+    if (!authReady) {
+      return (
+        <div className="rounded-2xl bg-gradient-card border border-border p-10 flex items-center justify-center text-muted-foreground gap-2">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      );
+    }
+    if (!user) {
+      return (
+        <div className="rounded-2xl bg-gradient-card border border-border p-8 md:p-10 text-center max-w-xl mx-auto">
+          <div className="h-14 w-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+            <ShieldCheck className="h-7 w-7" />
+          </div>
+          <h2 className="font-display font-bold text-2xl mb-2">Sign in to register</h2>
+          <p className="text-muted-foreground mb-6">
+            Spam aur fake registrations rokne ke liye Google se sign-in zaruri hai. Aapki details verified rahengi.
+          </p>
+          <Button
+            onClick={signInGoogle}
+            disabled={signingIn}
+            size="lg"
+            className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow"
+          >
+            {signingIn ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : (
+              <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1h-9.18v2.92h5.27c-.23 1.4-1.65 4.1-5.27 4.1-3.17 0-5.76-2.63-5.76-5.87s2.59-5.87 5.76-5.87c1.81 0 3.02.77 3.71 1.43l2.53-2.44C16.83 3.84 14.7 3 12.17 3 7.02 3 2.83 7.18 2.83 12.34s4.19 9.34 9.34 9.34c5.39 0 8.96-3.79 8.96-9.13 0-.61-.07-1.08-.18-1.55z"/></svg>
+            )}
+            Continue with Google
+          </Button>
+        </div>
+      );
+    }
+    if (alreadyRegistered) {
+      return (
+        <div className="rounded-2xl bg-gradient-card border border-border p-10 text-center">
+          <div className="h-16 w-16 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 className="h-8 w-8" />
+          </div>
+          <h2 className="font-display font-semibold text-2xl mb-2">You're already registered</h2>
+          <p className="text-muted-foreground">Aap is event ke liye already registered ho ({user.email}).</p>
+        </div>
+      );
+    }
+    if (done) {
+      return (
+        <div className="rounded-2xl bg-gradient-card border border-border p-10 text-center">
+          <div className="h-16 w-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
+            <CheckCircle2 className="h-8 w-8" />
+          </div>
+          <h2 className="font-display font-semibold text-2xl mb-2">You're registered!</h2>
+          <p className="text-muted-foreground">
+            We've received your registration{isPaid ? " and your payment is being verified" : ""}. See you at the event!
+          </p>
+        </div>
+      );
+    }
+    return (
+      <form onSubmit={submit} className="rounded-2xl bg-gradient-card border border-border p-6 md:p-10 grid sm:grid-cols-2 gap-4">
+        <div className="sm:col-span-2 mb-2 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div className="text-xs font-mono uppercase tracking-[0.2em] text-primary mb-2">Registration form</div>
+            <h2 className="font-display font-bold text-2xl">Reserve your spot</h2>
+          </div>
+          <div className="inline-flex items-center gap-2 text-xs bg-secondary/60 border border-border rounded-full px-3 py-1.5">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+            <span className="text-muted-foreground">{user.email}</span>
+            <button type="button" onClick={signOut} className="text-destructive hover:underline inline-flex items-center gap-1">
+              <LogOut className="h-3 w-3" /> Sign out
+            </button>
+          </div>
+        </div>
+
+        <div className="sm:col-span-2">
+          <Label>Full name *</Label>
+          <Input value={form.full_name ?? ""} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
+        </div>
+        <div>
+          <Label>Email (verified)</Label>
+          <Input type="email" value={user.email ?? ""} readOnly className="bg-muted/40 cursor-not-allowed" />
+        </div>
+        {required.phone !== false && (
+          <div>
+            <Label>Phone *</Label>
+            <Input value={form.phone ?? ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
+          </div>
+        )}
+        {required.branch && (
+          <div>
+            <Label>Branch *</Label>
+            <Input value={form.branch ?? ""} onChange={(e) => setForm({ ...form, branch: e.target.value })} required />
+          </div>
+        )}
+        {required.year && (
+          <div>
+            <Label>Year *</Label>
+            <Select value={form.year ?? ""} onValueChange={(val) => setForm({ ...form, year: val })}>
+              <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
+              <SelectContent>
+                {["1st", "2nd", "3rd", "4th"].map(y => <SelectItem key={y} value={y}>{y} year</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+        {required.message && (
+          <div className="sm:col-span-2">
+            <Label>Message *</Label>
+            <Textarea rows={3} value={form.message ?? ""} onChange={(e) => setForm({ ...form, message: e.target.value })} required />
+          </div>
+        )}
+
+        {questions.map((q) => (
+          <div key={q.id} className="sm:col-span-2">
+            <Label>{q.label}{q.required && " *"}</Label>
+            {q.type === "textarea" ? (
+              <Textarea rows={3} value={answers[q.id] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })} required={q.required} />
+            ) : q.type === "select" ? (
+              <Select value={answers[q.id] ?? ""} onValueChange={(val) => setAnswers({ ...answers, [q.id]: val })}>
+                <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+                <SelectContent>
+                  {(q.options ?? []).map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input value={answers[q.id] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })} required={q.required} />
+            )}
+          </div>
+        ))}
+
+        {isPaid && (
+          <div className="sm:col-span-2 rounded-xl border border-primary/40 bg-primary/5 p-5 space-y-4">
+            <div className="flex items-center gap-2 text-primary">
+              <IndianRupee className="h-4 w-4" />
+              <span className="font-display font-semibold">Payment required: ₹{fee}</span>
+            </div>
+            {event.payment_qr_url && (
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <img src={event.payment_qr_url} alt="Payment QR" className="h-48 w-48 rounded-lg border border-border bg-background object-contain p-2" />
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium text-foreground mb-1">Scan to pay ₹{fee}</p>
+                  <p>Open any UPI app, scan this QR, complete the payment and upload the screenshot below.</p>
+                </div>
+              </div>
+            )}
+            {event.payment_instructions && (
+              <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                {event.payment_instructions}
+              </div>
+            )}
+            <div>
+              <Label>Transaction / UPI Reference</Label>
+              <Input
+                value={form.transaction_ref ?? ""}
+                onChange={(e) => setForm({ ...form, transaction_ref: e.target.value })}
+                placeholder="e.g. UPI ref, txn ID"
+              />
+            </div>
+            <div>
+              <Label>Payment screenshot</Label>
+              <div className="mt-1 flex items-center gap-3">
+                <label className="flex items-center gap-2 cursor-pointer rounded-md border border-input bg-background px-3 py-2 text-sm hover:border-primary transition-colors">
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                  {proofUrl ? "Replace screenshot" : "Choose image"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => e.target.files?.[0] && handleProofUpload(e.target.files[0])}
+                  />
+                </label>
+                {proofUrl && <a href={proofUrl} target="_blank" rel="noreferrer" className="text-xs text-primary underline">View uploaded</a>}
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1">PNG/JPG, up to 5 MB. Provide either screenshot or transaction reference.</p>
+            </div>
+          </div>
+        )}
+
+        <div className="sm:col-span-2">
+          <Button type="submit" disabled={submitting || uploading} className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+            {submitting ? "Submitting…" : <>Confirm Registration <Send className="ml-2 h-4 w-4" /></>}
+          </Button>
+        </div>
+      </form>
+    );
+  };
 
   return (
     <main className="min-h-screen">
@@ -203,140 +451,7 @@ const EventDetail = () => {
           </div>
         </article>
 
-        {!event.registration_open ? (
-          <div className="rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
-            Registrations for this event are currently closed.
-          </div>
-        ) : done ? (
-          <div className="rounded-2xl bg-gradient-card border border-border p-10 text-center">
-            <div className="h-16 w-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
-              <CheckCircle2 className="h-8 w-8" />
-            </div>
-            <h2 className="font-display font-semibold text-2xl mb-2">You're registered!</h2>
-            <p className="text-muted-foreground">
-              We've received your registration{isPaid ? " and your payment is being verified" : ""}. See you at the event!
-            </p>
-          </div>
-        ) : (
-          <form onSubmit={submit} className="rounded-2xl bg-gradient-card border border-border p-6 md:p-10 grid sm:grid-cols-2 gap-4">
-            <div className="sm:col-span-2 mb-2">
-              <div className="text-xs font-mono uppercase tracking-[0.2em] text-primary mb-2">Registration form</div>
-              <h2 className="font-display font-bold text-2xl">Reserve your spot</h2>
-            </div>
-
-            <div className="sm:col-span-2">
-              <Label>Full name *</Label>
-              <Input value={form.full_name ?? ""} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
-            </div>
-            {required.email !== false && (
-              <div>
-                <Label>Email *</Label>
-                <Input type="email" value={form.email ?? ""} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-              </div>
-            )}
-            {required.phone !== false && (
-              <div>
-                <Label>Phone *</Label>
-                <Input value={form.phone ?? ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
-              </div>
-            )}
-            {required.branch && (
-              <div>
-                <Label>Branch *</Label>
-                <Input value={form.branch ?? ""} onChange={(e) => setForm({ ...form, branch: e.target.value })} required />
-              </div>
-            )}
-            {required.year && (
-              <div>
-                <Label>Year *</Label>
-                <Select value={form.year ?? ""} onValueChange={(val) => setForm({ ...form, year: val })}>
-                  <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
-                  <SelectContent>
-                    {["1st", "2nd", "3rd", "4th"].map(y => <SelectItem key={y} value={y}>{y} year</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            {required.message && (
-              <div className="sm:col-span-2">
-                <Label>Message *</Label>
-                <Textarea rows={3} value={form.message ?? ""} onChange={(e) => setForm({ ...form, message: e.target.value })} required />
-              </div>
-            )}
-
-            {questions.map((q) => (
-              <div key={q.id} className="sm:col-span-2">
-                <Label>{q.label}{q.required && " *"}</Label>
-                {q.type === "textarea" ? (
-                  <Textarea rows={3} value={answers[q.id] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })} required={q.required} />
-                ) : q.type === "select" ? (
-                  <Select value={answers[q.id] ?? ""} onValueChange={(val) => setAnswers({ ...answers, [q.id]: val })}>
-                    <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
-                    <SelectContent>
-                      {(q.options ?? []).map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Input value={answers[q.id] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })} required={q.required} />
-                )}
-              </div>
-            ))}
-
-            {isPaid && (
-              <div className="sm:col-span-2 rounded-xl border border-primary/40 bg-primary/5 p-5 space-y-4">
-                <div className="flex items-center gap-2 text-primary">
-                  <IndianRupee className="h-4 w-4" />
-                  <span className="font-display font-semibold">Payment required: ₹{fee}</span>
-                </div>
-                {event.payment_qr_url && (
-                  <div className="flex flex-col sm:flex-row items-start gap-4">
-                    <img src={event.payment_qr_url} alt="Payment QR" className="h-48 w-48 rounded-lg border border-border bg-background object-contain p-2" />
-                    <div className="text-sm text-muted-foreground">
-                      <p className="font-medium text-foreground mb-1">Scan to pay ₹{fee}</p>
-                      <p>Open any UPI app, scan this QR, complete the payment and upload the screenshot below.</p>
-                    </div>
-                  </div>
-                )}
-                {event.payment_instructions && (
-                  <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {event.payment_instructions}
-                  </div>
-                )}
-                <div>
-                  <Label>Transaction / UPI Reference</Label>
-                  <Input
-                    value={form.transaction_ref ?? ""}
-                    onChange={(e) => setForm({ ...form, transaction_ref: e.target.value })}
-                    placeholder="e.g. UPI ref, txn ID"
-                  />
-                </div>
-                <div>
-                  <Label>Payment screenshot</Label>
-                  <div className="mt-1 flex items-center gap-3">
-                    <label className="flex items-center gap-2 cursor-pointer rounded-md border border-input bg-background px-3 py-2 text-sm hover:border-primary transition-colors">
-                      {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                      {proofUrl ? "Replace screenshot" : "Choose image"}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => e.target.files?.[0] && handleProofUpload(e.target.files[0])}
-                      />
-                    </label>
-                    {proofUrl && <a href={proofUrl} target="_blank" rel="noreferrer" className="text-xs text-primary underline">View uploaded</a>}
-                  </div>
-                  <p className="text-[11px] text-muted-foreground mt-1">PNG/JPG, up to 5 MB. Provide either screenshot or transaction reference.</p>
-                </div>
-              </div>
-            )}
-
-            <div className="sm:col-span-2">
-              <Button type="submit" disabled={submitting || uploading} className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
-                {submitting ? "Submitting…" : <>Confirm Registration <Send className="ml-2 h-4 w-4" /></>}
-              </Button>
-            </div>
-          </form>
-        )}
+        {renderRegistrationArea()}
       </div>
 
       {lightbox && event.image_url && (
