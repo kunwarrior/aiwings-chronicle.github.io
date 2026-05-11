@@ -160,6 +160,7 @@ export type Database = {
           payment_status: string
           phone: string
           transaction_ref: string | null
+          user_id: string | null
           year: string | null
         }
         Insert: {
@@ -178,6 +179,7 @@ export type Database = {
           payment_status?: string
           phone: string
           transaction_ref?: string | null
+          user_id?: string | null
           year?: string | null
         }
         Update: {
@@ -196,6 +198,7 @@ export type Database = {
           payment_status?: string
           phone?: string
           transaction_ref?: string | null
+          user_id?: string | null
           year?: string | null
         }
         Relationships: [
