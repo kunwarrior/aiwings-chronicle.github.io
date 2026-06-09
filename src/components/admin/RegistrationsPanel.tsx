@@ -138,6 +138,7 @@ export const RegistrationsPanel = ({ password }: { password: string }) => {
 
   const filtered = rows.filter(r => {
     if (statusFilter !== "all" && r.payment_status !== statusFilter) return false;
+    if (eventFilter !== "all" && eventFilter === "general" ? (r.event_id !== null) : (r.event_id !== eventFilter)) return false;
     if (!filter) return true;
     const q = filter.toLowerCase();
     return [r.full_name, r.email, r.phone, r.transaction_ref, eventTitle(r.event_id)]
