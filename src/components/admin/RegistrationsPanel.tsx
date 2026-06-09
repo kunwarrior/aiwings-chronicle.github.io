@@ -68,6 +68,7 @@ export const RegistrationsPanel = ({ password }: { password: string }) => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [eventFilter, setEventFilter] = useState<string>("all");
   const [selected, setSelected] = useState<Registration | null>(null);
   const [notesDraft, setNotesDraft] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
@@ -137,6 +138,10 @@ export const RegistrationsPanel = ({ password }: { password: string }) => {
 
   const filtered = rows.filter(r => {
     if (statusFilter !== "all" && r.payment_status !== statusFilter) return false;
+    if (eventFilter !== "all") {
+      if (eventFilter === "general") { if (r.event_id !== null) return false; }
+      else if (r.event_id !== eventFilter) return false;
+    }
     if (!filter) return true;
     const q = filter.toLowerCase();
     return [r.full_name, r.email, r.phone, r.transaction_ref, eventTitle(r.event_id)]
@@ -182,12 +187,12 @@ export const RegistrationsPanel = ({ password }: { password: string }) => {
       <div className="grid sm:grid-cols-3 gap-3">
         <div className="rounded-xl bg-gradient-card border border-border p-4">
           <div className="text-xs font-mono uppercase text-muted-foreground">Total entries</div>
-          <div className="font-display font-bold text-2xl">{rows.length}</div>
+          <div className="font-display font-bold text-2xl">{filtered.length}</div>
         </div>
         <div className="rounded-xl bg-gradient-card border border-border p-4">
           <div className="text-xs font-mono uppercase text-muted-foreground">Paid</div>
           <div className="font-display font-bold text-2xl text-emerald-500">
-            {rows.filter(r => r.payment_status === "paid").length}
+            {filtered.filter(r => r.payment_status === "paid").length}
           </div>
         </div>
         <div className="rounded-xl bg-gradient-card border border-border p-4">
@@ -209,6 +214,16 @@ export const RegistrationsPanel = ({ password }: { password: string }) => {
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="paid">Paid</SelectItem>
             <SelectItem value="failed">Failed</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={eventFilter} onValueChange={setEventFilter}>
+          <SelectTrigger className="w-52"><SelectValue placeholder="All events" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All events</SelectItem>
+            <SelectItem value="general">General membership</SelectItem>
+            {events.map(e => (
+              <SelectItem key={e.id} value={e.id}>{e.title}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Button onClick={exportCSV} variant="outline" className="gap-2">
