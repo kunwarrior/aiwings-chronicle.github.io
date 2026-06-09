@@ -269,26 +269,76 @@ const EventDetail = () => {
       );
     }
     if (!user) {
-      return (
-        <div className="rounded-2xl bg-gradient-card border border-border p-8 md:p-10 text-center max-w-xl mx-auto">
-          <div className="h-14 w-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
-            <ShieldCheck className="h-7 w-7" />
+      if (signupSent) {
+        return (
+          <div className="rounded-2xl bg-gradient-card border border-border p-8 md:p-10 text-center max-w-xl mx-auto">
+            <div className="h-14 w-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+              <Mail className="h-7 w-7" />
+            </div>
+            <h2 className="font-display font-bold text-2xl mb-2">Check your email</h2>
+            <p className="text-muted-foreground mb-2">
+              Humne <span className="text-foreground font-medium">{authEmail}</span> pe verification link bhej diya hai.
+            </p>
+            <p className="text-muted-foreground text-sm">
+              Link click karne ke baad wapas is page pe aao — phir registration form milega.
+            </p>
+            <button
+              type="button"
+              onClick={() => { setSignupSent(false); setAuthMode("signin"); }}
+              className="text-primary text-sm mt-4 hover:underline"
+            >
+              Verified ho gaya? Sign in karo
+            </button>
           </div>
-          <h2 className="font-display font-bold text-2xl mb-2">Sign in to register</h2>
-          <p className="text-muted-foreground mb-6">
-            Spam aur fake registrations rokne ke liye Google se sign-in zaruri hai. Aapki details verified rahengi.
-          </p>
-          <Button
-            onClick={signInGoogle}
-            disabled={signingIn}
-            size="lg"
-            className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow"
-          >
-            {signingIn ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : (
-              <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1h-9.18v2.92h5.27c-.23 1.4-1.65 4.1-5.27 4.1-3.17 0-5.76-2.63-5.76-5.87s2.59-5.87 5.76-5.87c1.81 0 3.02.77 3.71 1.43l2.53-2.44C16.83 3.84 14.7 3 12.17 3 7.02 3 2.83 7.18 2.83 12.34s4.19 9.34 9.34 9.34c5.39 0 8.96-3.79 8.96-9.13 0-.61-.07-1.08-.18-1.55z"/></svg>
+        );
+      }
+      return (
+        <div className="rounded-2xl bg-gradient-card border border-border p-8 md:p-10 max-w-xl mx-auto">
+          <div className="text-center mb-6">
+            <div className="h-14 w-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck className="h-7 w-7" />
+            </div>
+            <h2 className="font-display font-bold text-2xl mb-2">
+              {authMode === "signup" ? "Create your account" : "Sign in to register"}
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              Spam aur fake registrations rokne ke liye email verification zaruri hai.
+            </p>
+          </div>
+          <form onSubmit={handleAuth} className="space-y-4">
+            {authMode === "signup" && (
+              <div>
+                <Label>Full name</Label>
+                <Input value={authName} onChange={(e) => setAuthName(e.target.value)} required />
+              </div>
             )}
-            Continue with Google
-          </Button>
+            <div>
+              <Label>Email</Label>
+              <Input type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required />
+            </div>
+            <div>
+              <Label>Password</Label>
+              <Input type="password" value={authPwd} onChange={(e) => setAuthPwd(e.target.value)} required minLength={6} />
+              {authMode === "signin" && (
+                <button type="button" onClick={sendResetLink} className="text-xs text-primary hover:underline mt-1">
+                  Forgot password?
+                </button>
+              )}
+            </div>
+            <Button type="submit" disabled={authBusy} size="lg" className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+              {authBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : (authMode === "signup" ? "Create account" : "Sign in")}
+            </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              {authMode === "signup" ? "Already have an account?" : "New here?"}{" "}
+              <button
+                type="button"
+                onClick={() => setAuthMode(authMode === "signup" ? "signin" : "signup")}
+                className="text-primary hover:underline font-medium"
+              >
+                {authMode === "signup" ? "Sign in" : "Create account"}
+              </button>
+            </p>
+          </form>
         </div>
       );
     }
