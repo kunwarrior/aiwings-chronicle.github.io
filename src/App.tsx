@@ -8,6 +8,7 @@ import { BrandingApplier } from "@/components/BrandingApplier";
 import Index from "./pages/Index.tsx";
 import Admin from "./pages/Admin.tsx";
 import EventDetail from "./pages/EventDetail.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/event/:id" element={<EventDetail />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
