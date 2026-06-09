@@ -113,13 +113,42 @@ const EventDetail = () => {
   const fee = Number(event?.fee_amount ?? 0);
   const isPaid = fee > 0;
 
-  const signInGoogle = async () => {
-    setSigningIn(true);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.href });
-    if (result.error) {
-      setSigningIn(false);
-      toast.error("Google sign-in failed. Please try again.");
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = authEmail.trim();
+    if (!email) return toast.error("Email daalo");
+    if (authPwd.length < 6) return toast.error("Password kam se kam 6 chars ka ho");
+    setAuthBusy(true);
+    if (authMode === "signup") {
+      if (authName.trim().length < 2) { setAuthBusy(false); return toast.error("Apna full name daalo"); }
+      const { error } = await supabase.auth.signUp({
+        email,
+        password: authPwd,
+        options: {
+          emailRedirectTo: window.location.href,
+          data: { full_name: authName.trim() },
+        },
+      });
+      setAuthBusy(false);
+      if (error) return toast.error(error.message);
+      setSignupSent(true);
+      toast.success("Verification email bhej diya hai. Inbox check karo.");
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email, password: authPwd });
+      setAuthBusy(false);
+      if (error) return toast.error(error.message);
+      toast.success("Signed in!");
     }
+  };
+
+  const sendResetLink = async () => {
+    const email = authEmail.trim();
+    if (!email) return toast.error("Pehle email daalo");
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Reset link bhej diya. Inbox check karo.");
   };
 
   const signOut = async () => {
