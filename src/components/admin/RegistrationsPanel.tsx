@@ -216,6 +216,16 @@ export const RegistrationsPanel = ({ password }: { password: string }) => {
             <SelectItem value="failed">Failed</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={eventFilter} onValueChange={setEventFilter}>
+          <SelectTrigger className="w-52"><SelectValue placeholder="All events" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All events</SelectItem>
+            <SelectItem value="general">General membership</SelectItem>
+            {events.map(e => (
+              <SelectItem key={e.id} value={e.id}>{e.title}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Button onClick={exportCSV} variant="outline" className="gap-2">
           <Download className="h-4 w-4" /> Export CSV / Excel
         </Button>
