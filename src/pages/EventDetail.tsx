@@ -50,7 +50,12 @@ const EventDetail = () => {
   const [event, setEvent] = useState<EventRow | null | undefined>(undefined);
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
-  const [signingIn, setSigningIn] = useState(false);
+  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPwd, setAuthPwd] = useState("");
+  const [authName, setAuthName] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
+  const [signupSent, setSignupSent] = useState(false);
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
   const [lightbox, setLightbox] = useState(false);
   const [done, setDone] = useState(false);
