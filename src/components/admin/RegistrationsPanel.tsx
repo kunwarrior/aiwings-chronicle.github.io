@@ -187,12 +187,12 @@ export const RegistrationsPanel = ({ password }: { password: string }) => {
       <div className="grid sm:grid-cols-3 gap-3">
         <div className="rounded-xl bg-gradient-card border border-border p-4">
           <div className="text-xs font-mono uppercase text-muted-foreground">Total entries</div>
-          <div className="font-display font-bold text-2xl">{rows.length}</div>
+          <div className="font-display font-bold text-2xl">{filtered.length}</div>
         </div>
         <div className="rounded-xl bg-gradient-card border border-border p-4">
           <div className="text-xs font-mono uppercase text-muted-foreground">Paid</div>
           <div className="font-display font-bold text-2xl text-emerald-500">
-            {rows.filter(r => r.payment_status === "paid").length}
+            {filtered.filter(r => r.payment_status === "paid").length}
           </div>
         </div>
         <div className="rounded-xl bg-gradient-card border border-border p-4">
