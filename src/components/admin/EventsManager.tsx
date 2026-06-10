@@ -34,9 +34,10 @@ type RequiredFields = {
 type CustomQuestion = {
   id: string;
   label: string;
-  type: "text" | "textarea" | "select";
+  type: "text" | "textarea" | "select" | "radio" | "image";
   required: boolean;
   options?: string[];
+
 };
 
 interface EventRow {
@@ -282,12 +283,14 @@ export const EventsManager = ({ password }: { password: string }) => {
                   <option value="text">Short text</option>
                   <option value="textarea">Long text</option>
                   <option value="select">Dropdown</option>
+                  <option value="radio">Multiple choice (options)</option>
+                  <option value="image">Image upload</option>
                 </select>
                 <label className="flex items-center gap-2 text-xs">
                   <Switch checked={q.required} onCheckedChange={(c) => updateQuestion(idx, { required: c })} />
                   Required
                 </label>
-                {q.type === "select" && (
+                {(q.type === "select" || q.type === "radio") && (
                   <Input
                     placeholder="Options, comma separated"
                     value={(q.options ?? []).join(", ")}
@@ -295,6 +298,7 @@ export const EventsManager = ({ password }: { password: string }) => {
                     className="sm:col-span-1"
                   />
                 )}
+
               </div>
             </div>
           ))}

@@ -25,7 +25,7 @@ const call = async (password: string, body: Record<string, unknown>) => {
   return j;
 };
 
-type CustomQuestion = { id: string; label: string; type?: string };
+type CustomQuestion = { id: string; label: string; type?: string; options?: string[] };
 
 interface Registration {
   id: string;
@@ -331,13 +331,25 @@ export const RegistrationsPanel = ({ password }: { password: string }) => {
                       <div className="space-y-2">
                         {selectedQuestions.map(q => {
                           const ans = selected.custom_responses?.[q.id];
+                          const isImage = q.type === "image" || (typeof ans === "string" && /^https?:\/\/.+\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(ans));
                           return (
                             <div key={q.id} className="rounded-md border border-border p-3">
                               <div className="text-xs text-muted-foreground mb-1">{q.label}</div>
-                              <div className="text-sm whitespace-pre-wrap">{ans && String(ans).trim() ? String(ans) : <span className="text-muted-foreground italic">— no answer —</span>}</div>
+                              {ans && String(ans).trim() ? (
+                                isImage ? (
+                                  <a href={String(ans)} target="_blank" rel="noreferrer" className="inline-block">
+                                    <img src={String(ans)} alt={q.label} className="max-h-40 rounded-md border border-border object-contain bg-background" />
+                                  </a>
+                                ) : (
+                                  <div className="text-sm whitespace-pre-wrap">{String(ans)}</div>
+                                )
+                              ) : (
+                                <div className="text-sm text-muted-foreground italic">— no answer —</div>
+                              )}
                             </div>
                           );
                         })}
+
                       </div>
                     </div>
                   )}
