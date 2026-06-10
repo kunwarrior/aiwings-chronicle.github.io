@@ -1,30 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useBrandingSettings } from "@/hooks/useSiteSettings";
 
 /**
- * Applies admin-controlled branding (custom dark-mode background colors)
- * to CSS variables on <html>. Re-runs whenever the user toggles light/dark
- * (we observe the `dark` class on <html>) so changes apply instantly.
+ * Applies admin-controlled branding (custom background colors)
+ * to CSS variables on <html>. Works in BOTH light and dark mode —
+ * the same chosen colors apply regardless of theme so the site
+ * looks consistent when the user switches.
  */
 export const BrandingApplier = () => {
   const { settings } = useBrandingSettings();
-  const [isDark, setIsDark] = useState(
-    typeof document !== "undefined" && document.documentElement.classList.contains("dark"),
-  );
-
-  // Observe theme class changes
-  useEffect(() => {
-    const root = document.documentElement;
-    const obs = new MutationObserver(() => {
-      setIsDark(root.classList.contains("dark"));
-    });
-    obs.observe(root, { attributes: true, attributeFilter: ["class"] });
-    return () => obs.disconnect();
-  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
-    if (isDark && settings.dark_bg_color) {
+    if (settings.dark_bg_color) {
       const c1 = settings.dark_bg_color;
       const c2 = settings.dark_bg_color_2 || c1;
       root.style.setProperty("--background", c1);
@@ -35,11 +23,10 @@ export const BrandingApplier = () => {
          linear-gradient(180deg, hsl(${c1}) 0%, hsl(${c2}) 100%)`,
       );
     } else {
-      // Clear overrides so default theme applies
       root.style.removeProperty("--background");
       root.style.removeProperty("--gradient-hero");
     }
-  }, [isDark, settings.dark_bg_color, settings.dark_bg_color_2]);
+  }, [settings.dark_bg_color, settings.dark_bg_color_2]);
 
   return null;
 };

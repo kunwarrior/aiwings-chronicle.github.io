@@ -207,10 +207,11 @@ export const SiteSettingsPanel = ({ password }: { password: string }) => {
       <div className="rounded-2xl bg-gradient-card border border-border p-6 space-y-5">
         <div>
           <div className="font-display font-semibold text-lg flex items-center gap-2 mb-1">
-            <Palette className="h-4 w-4 text-primary" /> Dark mode background
+            <Palette className="h-4 w-4 text-primary" /> Site background colors
           </div>
-          <p className="text-sm text-muted-foreground">Pick a preset or set your own colors. Only affects dark mode.</p>
+          <p className="text-sm text-muted-foreground">Pick a preset or set your own colors. Applies to both light and dark mode.</p>
         </div>
+
 
         <div>
           <Label className="text-xs text-muted-foreground">Quick presets</Label>
@@ -260,8 +261,9 @@ export const SiteSettingsPanel = ({ password }: { password: string }) => {
         </div>
 
         <div className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
-          <strong className="text-foreground">Tip:</strong> The accent color (blue/violet/etc.) is still controlled by the theme switcher in the navbar. This panel only changes the background.
+          <strong className="text-foreground">Tip:</strong> The accent color (blue/violet/etc.) is still controlled by the theme switcher in the navbar. This panel changes the page background in both light and dark mode.
         </div>
+
       </div>
 
       <div className="lg:col-span-2">
