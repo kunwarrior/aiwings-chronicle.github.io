@@ -21,10 +21,11 @@ type RequiredFields = {
 type CustomQuestion = {
   id: string;
   label: string;
-  type: "text" | "textarea" | "select";
+  type: "text" | "textarea" | "select" | "radio" | "image";
   required?: boolean;
   options?: string[];
 };
+
 
 interface EventRow {
   id: string;
@@ -432,11 +433,59 @@ const EventDetail = () => {
                   {(q.options ?? []).map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                 </SelectContent>
               </Select>
+            ) : q.type === "radio" ? (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(q.options ?? []).map(o => {
+                  const active = (answers[q.id] ?? "") === o;
+                  return (
+                    <button
+                      type="button"
+                      key={o}
+                      onClick={() => setAnswers({ ...answers, [q.id]: o })}
+                      className={`px-3 py-2 rounded-md border text-sm transition-colors ${active ? "border-primary bg-primary/10 text-primary" : "border-input bg-background hover:border-primary/60"}`}
+                    >
+                      {o}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : q.type === "image" ? (
+              <div className="mt-1 flex items-center gap-3">
+                <label className="flex items-center gap-2 cursor-pointer rounded-md border border-input bg-background px-3 py-2 text-sm hover:border-primary transition-colors">
+                  <Upload className="h-4 w-4" />
+                  {answers[q.id] ? "Replace image" : "Choose image"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return; }
+                      try {
+                        const ext = file.name.split(".").pop() || "png";
+                        const path = `custom-answers/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+                        const { error } = await supabase.storage.from("uploads").upload(path, file, { cacheControl: "3600", upsert: false });
+                        if (error) throw error;
+                        const { data } = supabase.storage.from("uploads").getPublicUrl(path);
+                        setAnswers((a) => ({ ...a, [q.id]: data.publicUrl }));
+                        toast.success("Image uploaded");
+                      } catch (err) { toast.error((err as Error).message); }
+                    }}
+                  />
+                </label>
+                {answers[q.id] && (
+                  <a href={answers[q.id]} target="_blank" rel="noreferrer" className="inline-block">
+                    <img src={answers[q.id]} alt="Uploaded" className="h-12 w-12 rounded-md object-cover border border-border" />
+                  </a>
+                )}
+              </div>
             ) : (
               <Input value={answers[q.id] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })} required={q.required} />
             )}
           </div>
         ))}
+
 
         {isPaid && (
           <div className="sm:col-span-2 rounded-xl border border-primary/40 bg-primary/5 p-5 space-y-4">
