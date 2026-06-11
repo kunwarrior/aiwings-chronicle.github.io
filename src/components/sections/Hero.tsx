@@ -18,11 +18,19 @@ export const Hero = () => {
   const logoRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Mouse parallax
+  // Mouse parallax — paused during scroll for smoothness
   useEffect(() => {
     if (!effectsOn) return;
     let raf = 0;
+    let scrolling = false;
+    let scrollTimer: number | undefined;
+    const onScroll = () => {
+      scrolling = true;
+      window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => { scrolling = false; }, 180);
+    };
     const handle = (e: MouseEvent) => {
+      if (scrolling) return;
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         const x = (e.clientX / window.innerWidth - 0.5) * 20;
@@ -31,8 +39,14 @@ export const Hero = () => {
         if (logoRef.current) logoRef.current.style.transform = `translate3d(${-x * 1.2}px, ${-y * 1.2}px, 0)`;
       });
     };
-    window.addEventListener("mousemove", handle);
-    return () => { window.removeEventListener("mousemove", handle); cancelAnimationFrame(raf); };
+    window.addEventListener("mousemove", handle, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", handle);
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(scrollTimer);
+      cancelAnimationFrame(raf);
+    };
   }, [effectsOn]);
 
   // Neural network canvas — animated nodes + connecting lines
@@ -50,6 +64,7 @@ export const Hero = () => {
     const resize = () => {
       w = canvas.clientWidth; h = canvas.clientHeight;
       canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
     };
     resize();

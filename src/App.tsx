@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme";
 import { BrandingApplier } from "@/components/BrandingApplier";
+import { MagneticCursor } from "@/components/MagneticCursor";
 import Index from "./pages/Index.tsx";
 import Admin from "./pages/Admin.tsx";
 import EventDetail from "./pages/EventDetail.tsx";
@@ -17,6 +18,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <BrandingApplier />
+      <MagneticCursor />
       <TooltipProvider>
         <Toaster />
         <Sonner />
