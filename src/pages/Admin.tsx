@@ -188,14 +188,17 @@ const Admin = () => {
   const [password, setPassword] = useState(() => sessionStorage.getItem("aiw-admin") ?? "");
   const [authed, setAuthed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(() => !!sessionStorage.getItem("aiw-admin"));
 
   useEffect(() => {
     if (password && !authed) {
-      // try silent verify
       (async () => {
         try { await call(password, { action: "verify" }); setAuthed(true); }
         catch { sessionStorage.removeItem("aiw-admin"); setPassword(""); }
+        finally { setVerifying(false); }
       })();
+    } else {
+      setVerifying(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -214,6 +217,14 @@ const Admin = () => {
     }
     finally { setLoading(false); }
   };
+
+  if (verifying) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </main>
+    );
+  }
 
   if (!authed) {
     return (
