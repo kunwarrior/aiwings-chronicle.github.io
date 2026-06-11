@@ -99,20 +99,54 @@
     background-image: var(--gradient-hero);
   }
   /* Magnetic cursor: hide native pointer on fine-pointer devices when active */
-  body.magnetic-cursor-on { cursor: none; }
-  body.magnetic-cursor-on a,
-  body.magnetic-cursor-on button,
-  body.magnetic-cursor-on [role="button"],
-  body.magnetic-cursor-on input,
-  body.magnetic-cursor-on textarea,
-  body.magnetic-cursor-on select { cursor: none; }
-  .magnetic-ring.is-hover {
-    width: 3.5rem;
-    height: 3.5rem;
-    background: hsl(var(--accent) / 0.15);
-    border-color: hsl(var(--accent));
-    mix-blend-mode: difference;
+  body.magnetic-cursor-on,
+  body.magnetic-cursor-on * { cursor: none !important; }
+
+  .magnetic-ring {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 9999px;
+    border: 1.5px solid hsl(var(--primary) / 0.85);
+    background: radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.12), transparent 70%);
+    box-shadow:
+      0 0 14px hsl(var(--primary) / 0.45),
+      inset 0 0 10px hsl(var(--primary-glow) / 0.25);
+    opacity: 0;
+    transition: width 220ms cubic-bezier(.34,1.56,.64,1),
+                height 220ms cubic-bezier(.34,1.56,.64,1),
+                border-color 200ms ease,
+                background-color 200ms ease,
+                opacity 200ms ease,
+                box-shadow 200ms ease;
+    will-change: transform, width, height;
   }
+  .magnetic-ring.is-visible { opacity: 1; }
+  .magnetic-ring.is-hover {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-color: hsl(var(--accent));
+    background: radial-gradient(circle at 50% 50%, hsl(var(--accent) / 0.22), transparent 70%);
+    box-shadow:
+      0 0 24px hsl(var(--accent) / 0.6),
+      inset 0 0 14px hsl(var(--primary-glow) / 0.4);
+  }
+  .magnetic-ring.is-press {
+    width: 1.75rem;
+    height: 1.75rem;
+    box-shadow: 0 0 30px hsl(var(--accent) / 0.8);
+  }
+  .magnetic-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: hsl(var(--primary));
+    box-shadow: 0 0 8px hsl(var(--primary-glow) / 0.9);
+    opacity: 0;
+    transition: opacity 150ms ease;
+    will-change: transform;
+  }
+  .magnetic-dot.is-visible { opacity: 1; }
+
   h1, h2, h3, h4 { font-family: 'Space Grotesk', system-ui, sans-serif; letter-spacing: -0.02em; }
 }
 
