@@ -2,9 +2,10 @@ import { useEffect, useRef } from "react";
 
 /**
  * Desktop-only magnetic ring cursor.
- * - Outer ring lerps toward mouse position.
- * - Small dot follows exactly.
- * - On hover over interactive elements: ring grows + magnetically snaps toward target center.
+ * - Outer ring lerps toward mouse / magnetic target every frame.
+ * - Inner dot follows mouse exactly.
+ * - Hover over interactive elements: ring grows, glows, pulses, and snaps toward target center.
+ * - Recomputes targets every frame so theme/layout changes never desync the ring.
  */
 export const MagneticCursor = () => {
   const ringRef = useRef<HTMLDivElement>(null);
@@ -16,70 +17,93 @@ export const MagneticCursor = () => {
 
     document.body.classList.add("magnetic-cursor-on");
 
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    let ringX = mouseX;
-    let ringY = mouseY;
-    let targetX = mouseX;
-    let targetY = mouseY;
-    let hoverTarget: Element | null = null;
+    const state = {
+      mouseX: window.innerWidth / 2,
+      mouseY: window.innerHeight / 2,
+      ringX: window.innerWidth / 2,
+      ringY: window.innerHeight / 2,
+      hoverTarget: null as Element | null,
+      visible: false,
+      pressed: false,
+    };
     let raf = 0;
 
-    const interactiveSelector = 'a, button, [role="button"], input, textarea, select, [data-cursor]';
+    const interactiveSelector =
+      'a, button, [role="button"], input, textarea, select, label, summary, [data-cursor]';
+
+    const setVisible = (v: boolean) => {
+      if (state.visible === v) return;
+      state.visible = v;
+      ringRef.current?.classList.toggle("is-visible", v);
+      dotRef.current?.classList.toggle("is-visible", v);
+    };
 
     const onMove = (e: MouseEvent) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      if (dotRef.current) {
-        dotRef.current.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
-      }
-      if (hoverTarget) {
-        const rect = (hoverTarget as HTMLElement).getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        // magnetic pull: 30% toward center
-        targetX = mouseX + (cx - mouseX) * 0.3;
-        targetY = mouseY + (cy - mouseY) * 0.3;
-      } else {
-        targetX = mouseX;
-        targetY = mouseY;
+      state.mouseX = e.clientX;
+      state.mouseY = e.clientY;
+      setVisible(true);
+      // Re-derive hover target from actual point — survives theme/layout swaps.
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const t = el?.closest?.(interactiveSelector) ?? null;
+      if (t !== state.hoverTarget) {
+        state.hoverTarget = t;
+        ringRef.current?.classList.toggle("is-hover", !!t);
       }
     };
 
-    const onOver = (e: MouseEvent) => {
-      const t = (e.target as Element)?.closest?.(interactiveSelector);
-      if (t) {
-        hoverTarget = t;
-        ringRef.current?.classList.add("is-hover");
-      }
+    const onLeave = () => setVisible(false);
+    const onEnter = () => setVisible(true);
+    const onDown = () => {
+      state.pressed = true;
+      ringRef.current?.classList.add("is-press");
     };
-    const onOut = (e: MouseEvent) => {
-      const t = (e.target as Element)?.closest?.(interactiveSelector);
-      if (t && t === hoverTarget) {
-        hoverTarget = null;
-        ringRef.current?.classList.remove("is-hover");
-      }
+    const onUp = () => {
+      state.pressed = false;
+      ringRef.current?.classList.remove("is-press");
     };
 
     const tick = () => {
-      ringX += (targetX - ringX) * 0.18;
-      ringY += (targetY - ringY) * 0.18;
+      // Recompute magnetic target each frame using current rect (handles reflow/theme change)
+      let tx = state.mouseX;
+      let ty = state.mouseY;
+      if (state.hoverTarget && document.contains(state.hoverTarget)) {
+        const r = (state.hoverTarget as HTMLElement).getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        tx = state.mouseX + (cx - state.mouseX) * 0.25;
+        ty = state.mouseY + (cy - state.mouseY) * 0.25;
+      } else if (state.hoverTarget) {
+        // target was removed from DOM (e.g. theme repaint)
+        state.hoverTarget = null;
+        ringRef.current?.classList.remove("is-hover");
+      }
+
+      state.ringX += (tx - state.ringX) * 0.22;
+      state.ringY += (ty - state.ringY) * 0.22;
+
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate3d(${state.mouseX}px, ${state.mouseY}px, 0) translate(-50%, -50%)`;
+      }
       if (ringRef.current) {
-        ringRef.current.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
+        ringRef.current.style.transform = `translate3d(${state.ringX}px, ${state.ringY}px, 0) translate(-50%, -50%)`;
       }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
 
     window.addEventListener("mousemove", onMove, { passive: true });
-    document.addEventListener("mouseover", onOver, true);
-    document.addEventListener("mouseout", onOut, true);
+    window.addEventListener("mousedown", onDown);
+    window.addEventListener("mouseup", onUp);
+    document.addEventListener("mouseleave", onLeave);
+    document.addEventListener("mouseenter", onEnter);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseover", onOver, true);
-      document.removeEventListener("mouseout", onOut, true);
+      window.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mouseup", onUp);
+      document.removeEventListener("mouseleave", onLeave);
+      document.removeEventListener("mouseenter", onEnter);
       document.body.classList.remove("magnetic-cursor-on");
     };
   }, []);
@@ -89,12 +113,12 @@ export const MagneticCursor = () => {
       <div
         ref={ringRef}
         aria-hidden
-        className="magnetic-ring pointer-events-none fixed top-0 left-0 z-[9999] h-8 w-8 rounded-full border-2 border-primary/80 shadow-[0_0_20px_hsl(var(--primary)/0.5)] transition-[width,height,background-color,border-color,opacity] duration-200 will-change-transform"
+        className="magnetic-ring pointer-events-none fixed top-0 left-0 z-[9999]"
       />
       <div
         ref={dotRef}
         aria-hidden
-        className="magnetic-dot pointer-events-none fixed top-0 left-0 z-[9999] h-1.5 w-1.5 rounded-full bg-primary will-change-transform"
+        className="magnetic-dot pointer-events-none fixed top-0 left-0 z-[9999]"
       />
     </>
   );
