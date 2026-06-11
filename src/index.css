@@ -97,7 +97,21 @@
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;
     background-image: var(--gradient-hero);
-    background-attachment: fixed;
+  }
+  /* Magnetic cursor: hide native pointer on fine-pointer devices when active */
+  body.magnetic-cursor-on { cursor: none; }
+  body.magnetic-cursor-on a,
+  body.magnetic-cursor-on button,
+  body.magnetic-cursor-on [role="button"],
+  body.magnetic-cursor-on input,
+  body.magnetic-cursor-on textarea,
+  body.magnetic-cursor-on select { cursor: none; }
+  .magnetic-ring.is-hover {
+    width: 3.5rem;
+    height: 3.5rem;
+    background: hsl(var(--accent) / 0.15);
+    border-color: hsl(var(--accent));
+    mix-blend-mode: difference;
   }
   h1, h2, h3, h4 { font-family: 'Space Grotesk', system-ui, sans-serif; letter-spacing: -0.02em; }
 }
