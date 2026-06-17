@@ -1,43 +1,85 @@
-# Smooth karna + magnetic cursor add karna
 
-## Problems found (root cause)
+# Aage kya add karna hai — Public + Admin dono
 
-1. **Hero canvas DPR bug** — `src/components/sections/Hero.tsx` me har resize pe `ctx.scale(dpr, dpr)` dobara call ho raha hai bina transform reset kiye. Iska matlab har resize pe canvas content compound ho ke bada hota jaata hai → window resize / scrollbar dikhne pe sudden "jhatka" lagta hai. Yahi viewport change session replay me bhi dikha (`1020x672` resize).
-2. **Admin login flash** — `src/pages/Admin.tsx` me, agar session me password saved hai toh pehle login form render hota hai, fir silent verify hone ke baad admin panel aata hai. Beech me "ek step waapis" jaisa flash dikhta hai. Loading state nahi hai.
-3. **Hero parallax + scroll** — mousemove pe `transform: translate3d(...)` set hota hai dono hero blocks pe. Scroll ke time bhi mousemove fire hote rehte hain → har frame DOM mutations (replay me yahi dikh raha hai). Yeh smoothness kharab karta hai.
-4. **`background-attachment: fixed`** + big blurred orbs scroll ke time heavy repaint karte hain — mobile/medium GPU pe jhatka feel hota hai.
+Aapka site core (events, registrations, payments, gallery, team, admin panel, cascade delete) already kaafi solid hai. Yeh plan sirf un cheezon pe focus hai jo missing/weak hain aur jinka real impact hoga.
 
-## Fixes
+---
 
-### 1. Glitch fixes
-- **Hero.tsx canvas**: resize ke andar `ctx.setTransform(1,0,0,1,0,0)` call kar ke phir `ctx.scale(dpr,dpr)` — compound scale band.
-- **Hero.tsx parallax**: scroll ke time parallax pause (passive scroll listener, 200ms idle ke baad resume). Idle ke time hi mouse parallax apply ho.
-- **Admin.tsx**: ek `verifying` state add — agar password saved hai toh login form / admin panel kuch bhi render nahi karna, sirf ek minimal centered spinner. Verify hone ke baad sahi screen.
-- **index.css**: `body` se `background-attachment: fixed` hatana (ya `@media (prefers-reduced-motion)` me) — scroll-time repaint kam hoga.
+## Part A — Public website ke liye (users)
 
-### 2. Magnetic cursor (naya)
-Naya component: **`src/components/MagneticCursor.tsx`**
-- Sirf desktop pe enable: `window.matchMedia('(pointer: fine)').matches` check.
-- DOM me 2 elements: ek outer **ring** (32px) jo smoothly cursor follow kare (lerp animation `requestAnimationFrame`), ek small **dot** (6px) jo exactly cursor pe rahe.
-- Hover detection: `mouseover`/`mouseout` listeners on `document` — jab target `a, button, [role="button"], input, textarea, [data-cursor]` ho:
-  - Ring scale `1.8x` ho jaye, color `accent`, mix-blend-mode `difference`.
-  - Magnetic pull: ring target ke center ki taraf ~30% slide ho (target ke `getBoundingClientRect()` se).
-- Style: `position: fixed; pointer-events: none; z-index: 9999;` — design tokens use (`border-primary`, `bg-primary`).
-- Optional: native cursor hide karna `body { cursor: none }` sirf jab `(pointer: fine)` — touch users normal cursor dekhe.
-- App.tsx me `<MagneticCursor />` mount karna (BrowserRouter ke andar ya bahar fine).
+### 1. Branded email notifications
+Abhi koi automatic email nahi jaata. Add karna:
+- **Custom email domain** setup (jaise `noreply@theaiwings.in`) — Lovable Cloud built-in email infra use karke.
+- **Registration confirmation email** — jaise hi user form submit kare, usko receipt mile (event name, fee, kya next steps).
+- **Payment verified email** — admin jab "paid" mark kare, user ko auto email jaye "Your spot is confirmed".
+- Sab emails branded template (club logo, colors).
 
-### 3. Errors sweep
-- Build/lint quickly check karunga; agar koi console warnings dikhe (key warnings, missing deps), spot-fix karunga **sirf agar same files chhuni padi**. Scope creep nahi.
+### 2. "My registrations" page (logged-in user)
+Google login already hai but user ko khud apni registrations dikhti nahi. Add:
+- `/my` route — logged-in user apni saari registrations, payment status, event details dekh sake.
+- "Cancel registration" button (sirf agar event abhi tak nahi hua).
 
-## Files to change
+### 3. Event detail page polish + countdown
+`EventDetail.tsx` page hai — usme add:
+- Live **countdown timer** (event start tak).
+- **"Seats left" indicator** (agar admin ne max capacity set kiya).
+- **Share buttons** (WhatsApp, copy link) — students ke liye event spread karna easy.
 
-- `src/components/sections/Hero.tsx` — canvas DPR fix + parallax scroll pause
-- `src/pages/Admin.tsx` — `verifying` loading state
-- `src/index.css` — `background-attachment` adjust
-- `src/components/MagneticCursor.tsx` *(new)*
-- `src/App.tsx` — mount MagneticCursor
+### 4. SEO + sharing
+- Proper `<title>`, meta description, Open Graph image (jab WhatsApp/LinkedIn pe share ho toh preview aaye).
+- Sitemap.xml + robots.txt update.
+- JSON-LD structured data (Event schema) for Google.
 
-## Out of scope
-- Hero ke 3 rotating rings hatana nahi — sirf canvas/parallax tweak.
-- Koi DB / RLS / edge function change nahi.
-- Mobile pe cursor disable (aapne confirm kiya: sirf desktop).
+### 5. Optional: Blog / Resources section
+Members ke liye AI tutorials, club announcements post karne ki jagah. Admin se manage ho.
+
+---
+
+## Part B — Admin / backend tools
+
+### 6. Max capacity per event
+Events table me `max_seats` field. Jab fill ho jaye, registration form auto-close. Admin ko dashboard pe "45/60 seats" dikhe.
+
+### 7. Bulk email from admin
+Admin panel me "Send email to all paid registrants of this event" button — reminders, venue change, etc. Lovable email infra use karega.
+
+### 8. Better analytics dashboard
+Admin home pe stat cards already hain. Add:
+- Registrations over time (chart, last 30 days).
+- Revenue per event (bar chart).
+- Conversion funnel: views → registered → paid.
+
+### 9. CSV/Excel export improvements
+Already CSV export hai. Add:
+- Filter by date range.
+- Export **only paid** / only pending shortcut.
+- Excel format (.xlsx) bhi support (abhi sirf CSV).
+
+### 10. Audit log
+Kis admin ne kaunsa change kab kiya — chhota log table. Future me agar dispute ho ya delete revert karna ho.
+
+### 11. Storage usage indicator
+Aapne pucha tha storage ka — admin panel pe ek widget jo dikhaye "Used: 245 MB / 1 GB" with breakdown (event posters, payment screenshots, gallery).
+
+---
+
+## Recommended order (mera suggestion)
+
+Agar sab nahi karna toh **top 4 highest-impact**:
+
+1. **Branded emails** (#1) — biggest user trust boost, professional feel.
+2. **Max capacity per event** (#6) — abhi koi limit nahi hai, over-registration ho sakta hai.
+3. **"My registrations" page** (#2) — Google login already hai, user value double.
+4. **SEO + OG image** (#4) — WhatsApp pe share hone pe pretty preview = zyada signups.
+
+---
+
+## Out of scope (abhi nahi)
+- Payment gateway integration (Razorpay/Stripe) — abhi manual UPI + screenshot flow hi rakhenge.
+- Mobile app.
+- Realtime chat / community.
+
+---
+
+## Aap batao
+Konse points implement karu? Top 4 (1, 6, 2, 4) recommend karta hoon — ya aap khud pick karo numbers se (e.g. "1, 3, 6 karo").
