@@ -6,12 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Plus, Trash2, Lock, Sparkles, Pencil, X, Settings as SettingsIcon } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Trash2, Lock, Sparkles, Pencil, X, Settings as SettingsIcon, LayoutDashboard } from "lucide-react";
 import { ImageInput } from "@/components/admin/ImageInput";
 import { Switch } from "@/components/ui/switch";
 import { SiteSettingsPanel } from "@/components/admin/SiteSettingsPanel";
 import { RegistrationsPanel } from "@/components/admin/RegistrationsPanel";
 import { EventsManager } from "@/components/admin/EventsManager";
+import { DashboardPanel } from "@/components/admin/DashboardPanel";
 
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
 
