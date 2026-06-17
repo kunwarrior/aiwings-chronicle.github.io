@@ -6,12 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Plus, Trash2, Lock, Sparkles, Pencil, X, Settings as SettingsIcon } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Trash2, Lock, Sparkles, Pencil, X, Settings as SettingsIcon, LayoutDashboard } from "lucide-react";
 import { ImageInput } from "@/components/admin/ImageInput";
 import { Switch } from "@/components/ui/switch";
 import { SiteSettingsPanel } from "@/components/admin/SiteSettingsPanel";
 import { RegistrationsPanel } from "@/components/admin/RegistrationsPanel";
 import { EventsManager } from "@/components/admin/EventsManager";
+import { DashboardPanel } from "@/components/admin/DashboardPanel";
 
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
 
@@ -263,8 +264,9 @@ const Admin = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue="activities">
+        <Tabs defaultValue="dashboard">
           <TabsList className="mb-6 flex-wrap h-auto">
+            <TabsTrigger value="dashboard"><LayoutDashboard className="h-3.5 w-3.5 mr-1" /> Dashboard</TabsTrigger>
             <TabsTrigger value="activities">Activities</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
@@ -273,6 +275,11 @@ const Admin = () => {
             <TabsTrigger value="registrations">Registrations</TabsTrigger>
             <TabsTrigger value="settings"><SettingsIcon className="h-3.5 w-3.5 mr-1" /> Settings</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="dashboard">
+            <DashboardPanel password={password} />
+          </TabsContent>
+
 
           <TabsContent value="activities">
             <TableManager
