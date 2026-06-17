@@ -264,8 +264,9 @@ const Admin = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue="activities">
+        <Tabs defaultValue="dashboard">
           <TabsList className="mb-6 flex-wrap h-auto">
+            <TabsTrigger value="dashboard"><LayoutDashboard className="h-3.5 w-3.5 mr-1" /> Dashboard</TabsTrigger>
             <TabsTrigger value="activities">Activities</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
@@ -274,6 +275,11 @@ const Admin = () => {
             <TabsTrigger value="registrations">Registrations</TabsTrigger>
             <TabsTrigger value="settings"><SettingsIcon className="h-3.5 w-3.5 mr-1" /> Settings</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="dashboard">
+            <DashboardPanel password={password} />
+          </TabsContent>
+
 
           <TabsContent value="activities">
             <TableManager
