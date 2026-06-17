@@ -45,9 +45,107 @@ Deno.serve(async (req) => {
 
     if (action === "verify") return json({ ok: true });
 
-    if (!ALLOWED_TABLES.has(table)) return json({ error: "Invalid table" }, 400);
-
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
+
+    if (action === "stats") {
+      const [evRes, regRes, teamRes, galRes, actRes, achRes] = await Promise.all([
+        supabase.from("events").select("id, title, event_date, is_live, registration_open, fee_amount, created_at"),
+        supabase.from("registrations").select("id, event_id, payment_status, fee_amount, created_at, full_name, email"),
+        supabase.from("team_members").select("id", { count: "exact", head: true }),
+        supabase.from("gallery").select("id", { count: "exact", head: true }),
+        supabase.from("activities").select("id", { count: "exact", head: true }),
+        supabase.from("achievements").select("id", { count: "exact", head: true }),
+      ]);
+
+      const events = evRes.data ?? [];
+      const regs = regRes.data ?? [];
+      const now = Date.now();
+
+      const eventStats = {
+        total: events.length,
+        live: events.filter((e: any) => e.is_live).length,
+        upcoming: events.filter((e: any) => new Date(e.event_date).getTime() > now).length,
+        past: events.filter((e: any) => new Date(e.event_date).getTime() <= now).length,
+        open: events.filter((e: any) => e.registration_open).length,
+      };
+
+      const paid = regs.filter((r: any) => r.payment_status === "verified" || r.payment_status === "paid");
+      const pending = regs.filter((r: any) => r.payment_status === "pending");
+      const rejected = regs.filter((r: any) => r.payment_status === "rejected");
+      const free = regs.filter((r: any) => !r.payment_status || r.payment_status === "free" || r.payment_status === "n/a");
+
+      const revenue = paid.reduce((s: number, r: any) => s + Number(r.fee_amount || 0), 0);
+      const pendingRevenue = pending.reduce((s: number, r: any) => s + Number(r.fee_amount || 0), 0);
+
+      const dayMap: Record<string, number> = {};
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(now - i * 86400000).toISOString().slice(0, 10);
+        dayMap[d] = 0;
+      }
+      regs.forEach((r: any) => {
+        const d = (r.created_at as string).slice(0, 10);
+        if (d in dayMap) dayMap[d]++;
+      });
+      const timeline = Object.entries(dayMap).map(([date, count]) => ({ date, count }));
+
+      const evCount: Record<string, number> = {};
+      regs.forEach((r: any) => { evCount[r.event_id] = (evCount[r.event_id] ?? 0) + 1; });
+      const topEvents = events
+        .map((e: any) => ({ id: e.id, title: e.title, count: evCount[e.id] ?? 0, event_date: e.event_date, is_live: e.is_live }))
+        .sort((a: any, b: any) => b.count - a.count)
+        .slice(0, 5);
+
+      const recentRegs = [...regs]
+        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 10)
+        .map((r: any) => {
+          const ev = events.find((e: any) => e.id === r.event_id);
+          return { id: r.id, full_name: r.full_name, email: r.email, payment_status: r.payment_status, fee_amount: r.fee_amount, created_at: r.created_at, event_title: ev?.title ?? "—" };
+        });
+
+      const storage = { files: 0, bytes: 0 };
+      try {
+        async function walk(prefix: string) {
+          const { data } = await supabase.storage.from(BUCKET).list(prefix, { limit: 1000 });
+          if (!data) return;
+          for (const item of data) {
+            if (item.id === null || !item.metadata) {
+              await walk(prefix ? `${prefix}/${item.name}` : item.name);
+            } else {
+              storage.files++;
+              storage.bytes += Number(item.metadata?.size ?? 0);
+            }
+          }
+        }
+        await walk("");
+      } catch (e) { console.error("storage stat err", e); }
+
+      return json({
+        data: {
+          events: eventStats,
+          registrations: {
+            total: regs.length,
+            paid: paid.length,
+            pending: pending.length,
+            rejected: rejected.length,
+            free: free.length,
+          },
+          revenue: { collected: revenue, pending: pendingRevenue },
+          counts: {
+            team: teamRes.count ?? 0,
+            gallery: galRes.count ?? 0,
+            activities: actRes.count ?? 0,
+            achievements: achRes.count ?? 0,
+          },
+          timeline,
+          topEvents,
+          recentRegs,
+          storage,
+        }
+      });
+    }
+
+    if (!ALLOWED_TABLES.has(table)) return json({ error: "Invalid table" }, 400);
 
     if (action === "list") {
       const { data, error } = await supabase.from(table).select("*").order("created_at", { ascending: false });
