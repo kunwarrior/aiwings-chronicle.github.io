@@ -1,5 +1,16 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
+/**
+ * PER-DEVICE THEME ONLY.
+ *
+ * Theme mode (light/dark) and accent color chosen from the navbar are stored
+ * ONLY in this browser's localStorage. They are NEVER written to the database,
+ * so one visitor's choice can never affect any other visitor's website.
+ * Global visual changes are only possible from Admin → Site Settings.
+ *
+ * Do not add DB writes here.
+ */
+
 type Theme = "light" | "dark";
 type Accent = "blue" | "cyan" | "violet" | "emerald" | "rose" | "amber" | "orange" | "pink";
 
@@ -23,14 +34,21 @@ const ACCENTS: Record<Accent, { primary: string; glow: string; accent: string; r
 
 const Ctx = createContext<ThemeCtx | null>(null);
 
+const safeGet = (k: string): string | null => {
+  try { return localStorage.getItem(k); } catch { return null; }
+};
+const safeSet = (k: string, v: string) => {
+  try { localStorage.setItem(k, v); } catch { /* private mode / storage disabled */ }
+};
+
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem("aiw-theme") as Theme) || "dark");
-  const [accent, setAccentState] = useState<Accent>(() => (localStorage.getItem("aiw-accent") as Accent) || "blue");
+  const [theme, setTheme] = useState<Theme>(() => (safeGet("aiw-theme") as Theme) || "dark");
+  const [accent, setAccentState] = useState<Accent>(() => (safeGet("aiw-accent") as Accent) || "blue");
 
   useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle("dark", theme === "dark");
-    localStorage.setItem("aiw-theme", theme);
+    safeSet("aiw-theme", theme);
   }, [theme]);
 
   useEffect(() => {
@@ -40,7 +58,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     root.style.setProperty("--primary-glow", a.glow);
     root.style.setProperty("--accent", a.accent);
     root.style.setProperty("--ring", a.ring);
-    localStorage.setItem("aiw-accent", accent);
+    safeSet("aiw-accent", accent);
   }, [accent]);
 
   return (
