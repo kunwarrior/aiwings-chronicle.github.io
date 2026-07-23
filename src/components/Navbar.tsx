@@ -73,7 +73,7 @@ export const Navbar = () => {
 
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Button variant="ghost" size="icon" onClick={() => setPalOpen((v) => !v)} aria-label="Theme color">
+              <Button variant="ghost" size="icon" onClick={() => setPalOpen((v) => !v)} aria-label="Theme color (only changes your device)" title="Only changes your device">
                 <Palette className="h-4 w-4" />
               </Button>
               {palOpen && (
@@ -93,7 +93,7 @@ export const Navbar = () => {
                 </div>
               )}
             </div>
-            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme (only changes your device)" title="Only changes your device">
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
             <Button asChild size="sm" className="hidden md:inline-flex bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
