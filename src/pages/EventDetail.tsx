@@ -120,8 +120,29 @@ const EventDetail = () => {
     e.preventDefault();
     const email = authEmail.trim();
     if (!email) return toast.error("Email daalo");
-    if (authPwd.length < 6) return toast.error("Password kam se kam 6 chars ka ho");
+
     setAuthBusy(true);
+
+    if (authMethod === "otp") {
+      if (authMode === "signup" && authName.trim().length < 2) {
+        setAuthBusy(false);
+        return toast.error("Apna full name daalo");
+      }
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: authMode === "signup",
+          data: authMode === "signup" ? { full_name: authName.trim() } : undefined,
+        },
+      });
+      setAuthBusy(false);
+      if (error) return toast.error(error.message);
+      setOtpSent(true);
+      toast.success("6-digit OTP bhej diya hai. Email check karo.");
+      return;
+    }
+
+    if (authPwd.length < 6) { setAuthBusy(false); return toast.error("Password kam se kam 6 chars ka ho"); }
     if (authMode === "signup") {
       if (authName.trim().length < 2) { setAuthBusy(false); return toast.error("Apna full name daalo"); }
       const { error } = await supabase.auth.signUp({
@@ -134,7 +155,7 @@ const EventDetail = () => {
       });
       setAuthBusy(false);
       if (error) return toast.error(error.message);
-      setSignupSent(true);
+      setOtpSent(true);
       toast.success("Verification email bhej diya hai. Inbox check karo.");
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password: authPwd });
@@ -143,6 +164,34 @@ const EventDetail = () => {
       toast.success("Signed in!");
     }
   };
+
+  const verifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = authEmail.trim();
+    const token = otpCode.trim();
+    if (token.length < 6) return toast.error("6-digit code daalo");
+    setAuthBusy(true);
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
+    setAuthBusy(false);
+    if (error) return toast.error(error.message);
+    setOtpSent(false);
+    setOtpCode("");
+    toast.success("Verified! Welcome.");
+  };
+
+  const resendOtp = async () => {
+    const email = authEmail.trim();
+    if (!email) return;
+    setAuthBusy(true);
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: authMode === "signup" },
+    });
+    setAuthBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Naya OTP bhej diya");
+  };
+
 
   const sendResetLink = async () => {
     const email = authEmail.trim();
