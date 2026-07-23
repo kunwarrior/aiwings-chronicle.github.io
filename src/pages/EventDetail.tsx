@@ -52,11 +52,13 @@ const EventDetail = () => {
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [authMethod, setAuthMethod] = useState<"otp" | "password">("otp");
   const [authEmail, setAuthEmail] = useState("");
   const [authPwd, setAuthPwd] = useState("");
   const [authName, setAuthName] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
-  const [signupSent, setSignupSent] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
   const [lightbox, setLightbox] = useState(false);
   const [done, setDone] = useState(false);
@@ -118,8 +120,29 @@ const EventDetail = () => {
     e.preventDefault();
     const email = authEmail.trim();
     if (!email) return toast.error("Email daalo");
-    if (authPwd.length < 6) return toast.error("Password kam se kam 6 chars ka ho");
+
     setAuthBusy(true);
+
+    if (authMethod === "otp") {
+      if (authMode === "signup" && authName.trim().length < 2) {
+        setAuthBusy(false);
+        return toast.error("Apna full name daalo");
+      }
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: authMode === "signup",
+          data: authMode === "signup" ? { full_name: authName.trim() } : undefined,
+        },
+      });
+      setAuthBusy(false);
+      if (error) return toast.error(error.message);
+      setOtpSent(true);
+      toast.success("6-digit OTP bhej diya hai. Email check karo.");
+      return;
+    }
+
+    if (authPwd.length < 6) { setAuthBusy(false); return toast.error("Password kam se kam 6 chars ka ho"); }
     if (authMode === "signup") {
       if (authName.trim().length < 2) { setAuthBusy(false); return toast.error("Apna full name daalo"); }
       const { error } = await supabase.auth.signUp({
@@ -132,7 +155,7 @@ const EventDetail = () => {
       });
       setAuthBusy(false);
       if (error) return toast.error(error.message);
-      setSignupSent(true);
+      setOtpSent(true);
       toast.success("Verification email bhej diya hai. Inbox check karo.");
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password: authPwd });
@@ -141,6 +164,34 @@ const EventDetail = () => {
       toast.success("Signed in!");
     }
   };
+
+  const verifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = authEmail.trim();
+    const token = otpCode.trim();
+    if (token.length < 6) return toast.error("6-digit code daalo");
+    setAuthBusy(true);
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
+    setAuthBusy(false);
+    if (error) return toast.error(error.message);
+    setOtpSent(false);
+    setOtpCode("");
+    toast.success("Verified! Welcome.");
+  };
+
+  const resendOtp = async () => {
+    const email = authEmail.trim();
+    if (!email) return;
+    setAuthBusy(true);
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: authMode === "signup" },
+    });
+    setAuthBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Naya OTP bhej diya");
+  };
+
 
   const sendResetLink = async () => {
     const email = authEmail.trim();
@@ -270,7 +321,46 @@ const EventDetail = () => {
       );
     }
     if (!user) {
-      if (signupSent) {
+      if (otpSent && authMethod === "otp") {
+        return (
+          <div className="rounded-2xl bg-gradient-card border border-border p-8 md:p-10 text-center max-w-xl mx-auto">
+            <div className="h-14 w-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+              <Mail className="h-7 w-7" />
+            </div>
+            <h2 className="font-display font-bold text-2xl mb-2">Enter OTP</h2>
+            <p className="text-muted-foreground mb-5 text-sm">
+              Humne <span className="text-foreground font-medium">{authEmail}</span> pe 6-digit code bheja hai.
+            </p>
+            <form onSubmit={verifyOtp} className="space-y-4 text-left">
+              <div>
+                <Label>6-digit code</Label>
+                <Input
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                  placeholder="123456"
+                  className="text-center tracking-[0.5em] text-lg font-mono"
+                  required
+                />
+              </div>
+              <Button type="submit" disabled={authBusy} size="lg" className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+                {authBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify & continue"}
+              </Button>
+              <div className="flex items-center justify-between text-xs">
+                <button type="button" onClick={() => { setOtpSent(false); setOtpCode(""); }} className="text-muted-foreground hover:text-foreground">
+                  ← Change email
+                </button>
+                <button type="button" onClick={resendOtp} disabled={authBusy} className="text-primary hover:underline">
+                  Resend code
+                </button>
+              </div>
+            </form>
+          </div>
+        );
+      }
+      if (otpSent && authMethod === "password") {
         return (
           <div className="rounded-2xl bg-gradient-card border border-border p-8 md:p-10 text-center max-w-xl mx-auto">
             <div className="h-14 w-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
@@ -280,12 +370,9 @@ const EventDetail = () => {
             <p className="text-muted-foreground mb-2">
               Humne <span className="text-foreground font-medium">{authEmail}</span> pe verification link bhej diya hai.
             </p>
-            <p className="text-muted-foreground text-sm">
-              Link click karne ke baad wapas is page pe aao — phir registration form milega.
-            </p>
             <button
               type="button"
-              onClick={() => { setSignupSent(false); setAuthMode("signin"); }}
+              onClick={() => { setOtpSent(false); setAuthMode("signin"); }}
               className="text-primary text-sm mt-4 hover:underline"
             >
               Verified ho gaya? Sign in karo
@@ -306,6 +393,24 @@ const EventDetail = () => {
               Spam aur fake registrations rokne ke liye email verification zaruri hai.
             </p>
           </div>
+
+          <div className="mb-5 grid grid-cols-2 gap-2 rounded-lg bg-secondary/50 p-1">
+            <button
+              type="button"
+              onClick={() => setAuthMethod("otp")}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${authMethod === "otp" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              Email OTP
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthMethod("password")}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${authMethod === "password" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              Password
+            </button>
+          </div>
+
           <form onSubmit={handleAuth} className="space-y-4">
             {authMode === "signup" && (
               <div>
@@ -317,17 +422,23 @@ const EventDetail = () => {
               <Label>Email</Label>
               <Input type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required />
             </div>
-            <div>
-              <Label>Password</Label>
-              <Input type="password" value={authPwd} onChange={(e) => setAuthPwd(e.target.value)} required minLength={6} />
-              {authMode === "signin" && (
-                <button type="button" onClick={sendResetLink} className="text-xs text-primary hover:underline mt-1">
-                  Forgot password?
-                </button>
-              )}
-            </div>
+            {authMethod === "password" && (
+              <div>
+                <Label>Password</Label>
+                <Input type="password" value={authPwd} onChange={(e) => setAuthPwd(e.target.value)} required minLength={6} />
+                {authMode === "signin" && (
+                  <button type="button" onClick={sendResetLink} className="text-xs text-primary hover:underline mt-1">
+                    Forgot password?
+                  </button>
+                )}
+              </div>
+            )}
             <Button type="submit" disabled={authBusy} size="lg" className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
-              {authBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : (authMode === "signup" ? "Create account" : "Sign in")}
+              {authBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : (
+                authMethod === "otp"
+                  ? "Send OTP"
+                  : (authMode === "signup" ? "Create account" : "Sign in")
+              )}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
               {authMode === "signup" ? "Already have an account?" : "New here?"}{" "}
@@ -342,6 +453,7 @@ const EventDetail = () => {
           </form>
         </div>
       );
+
     }
     if (alreadyRegistered) {
       return (
