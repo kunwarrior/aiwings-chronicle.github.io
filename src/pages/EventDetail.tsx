@@ -52,13 +52,10 @@ const EventDetail = () => {
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
-  const [authMethod, setAuthMethod] = useState<"otp" | "password">("otp");
   const [authEmail, setAuthEmail] = useState("");
   const [authPwd, setAuthPwd] = useState("");
   const [authName, setAuthName] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
   const [lightbox, setLightbox] = useState(false);
   const [done, setDone] = useState(false);
