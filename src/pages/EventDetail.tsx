@@ -270,65 +270,6 @@ const EventDetail = () => {
       );
     }
     if (!user) {
-      if (otpSent && authMethod === "otp") {
-        return (
-          <div className="rounded-2xl bg-gradient-card border border-border p-8 md:p-10 text-center max-w-xl mx-auto">
-            <div className="h-14 w-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
-              <Mail className="h-7 w-7" />
-            </div>
-            <h2 className="font-display font-bold text-2xl mb-2">Enter OTP</h2>
-            <p className="text-muted-foreground mb-5 text-sm">
-              Humne <span className="text-foreground font-medium">{authEmail}</span> pe 6-digit code bheja hai.
-            </p>
-            <form onSubmit={verifyOtp} className="space-y-4 text-left">
-              <div>
-                <Label>6-digit code</Label>
-                <Input
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={6}
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                  placeholder="123456"
-                  className="text-center tracking-[0.5em] text-lg font-mono"
-                  required
-                />
-              </div>
-              <Button type="submit" disabled={authBusy} size="lg" className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
-                {authBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify & continue"}
-              </Button>
-              <div className="flex items-center justify-between text-xs">
-                <button type="button" onClick={() => { setOtpSent(false); setOtpCode(""); }} className="text-muted-foreground hover:text-foreground">
-                  ← Change email
-                </button>
-                <button type="button" onClick={resendOtp} disabled={authBusy} className="text-primary hover:underline">
-                  Resend code
-                </button>
-              </div>
-            </form>
-          </div>
-        );
-      }
-      if (otpSent && authMethod === "password") {
-        return (
-          <div className="rounded-2xl bg-gradient-card border border-border p-8 md:p-10 text-center max-w-xl mx-auto">
-            <div className="h-14 w-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
-              <Mail className="h-7 w-7" />
-            </div>
-            <h2 className="font-display font-bold text-2xl mb-2">Check your email</h2>
-            <p className="text-muted-foreground mb-2">
-              Humne <span className="text-foreground font-medium">{authEmail}</span> pe verification link bhej diya hai.
-            </p>
-            <button
-              type="button"
-              onClick={() => { setOtpSent(false); setAuthMode("signin"); }}
-              className="text-primary text-sm mt-4 hover:underline"
-            >
-              Verified ho gaya? Sign in karo
-            </button>
-          </div>
-        );
-      }
       return (
         <div className="rounded-2xl bg-gradient-card border border-border p-8 md:p-10 max-w-xl mx-auto">
           <div className="text-center mb-6">
@@ -339,25 +280,10 @@ const EventDetail = () => {
               {authMode === "signup" ? "Create your account" : "Sign in to register"}
             </h2>
             <p className="text-muted-foreground text-sm">
-              Spam aur fake registrations rokne ke liye email verification zaruri hai.
+              {authMode === "signup"
+                ? "Ek baar account bana lo, phir turant register kar sakte ho."
+                : "Sign in karke event ke liye register karo."}
             </p>
-          </div>
-
-          <div className="mb-5 grid grid-cols-2 gap-2 rounded-lg bg-secondary/50 p-1">
-            <button
-              type="button"
-              onClick={() => setAuthMethod("otp")}
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${authMethod === "otp" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              Email OTP
-            </button>
-            <button
-              type="button"
-              onClick={() => setAuthMethod("password")}
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${authMethod === "password" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              Password
-            </button>
           </div>
 
           <form onSubmit={handleAuth} className="space-y-4">
@@ -371,23 +297,17 @@ const EventDetail = () => {
               <Label>Email</Label>
               <Input type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required />
             </div>
-            {authMethod === "password" && (
-              <div>
-                <Label>Password</Label>
-                <Input type="password" value={authPwd} onChange={(e) => setAuthPwd(e.target.value)} required minLength={6} />
-                {authMode === "signin" && (
-                  <button type="button" onClick={sendResetLink} className="text-xs text-primary hover:underline mt-1">
-                    Forgot password?
-                  </button>
-                )}
-              </div>
-            )}
-            <Button type="submit" disabled={authBusy} size="lg" className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
-              {authBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : (
-                authMethod === "otp"
-                  ? "Send OTP"
-                  : (authMode === "signup" ? "Create account" : "Sign in")
+            <div>
+              <Label>Password</Label>
+              <Input type="password" value={authPwd} onChange={(e) => setAuthPwd(e.target.value)} required minLength={6} />
+              {authMode === "signin" && (
+                <button type="button" onClick={sendResetLink} className="text-xs text-primary hover:underline mt-1">
+                  Forgot password?
+                </button>
               )}
+            </div>
+            <Button type="submit" disabled={authBusy} size="lg" className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+              {authBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : (authMode === "signup" ? "Create account" : "Sign in")}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
               {authMode === "signup" ? "Already have an account?" : "New here?"}{" "}
@@ -402,7 +322,6 @@ const EventDetail = () => {
           </form>
         </div>
       );
-
     }
     if (alreadyRegistered) {
       return (
