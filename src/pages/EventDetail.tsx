@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { ArrowLeft, Calendar, MapPin, IndianRupee, Upload, Loader2, CheckCircle2, X, Send, ShieldCheck, LogOut, Mail } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, IndianRupee, Upload, Loader2, CheckCircle2, X, Send, ShieldCheck, LogOut } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 
