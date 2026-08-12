@@ -1,30 +1,25 @@
-## Problem
+# Mobile carousel for Team Leaders
 
-`supabase.auth.signInWithOtp({ email })` is being called correctly, but users receive a **magic link** in their email instead of a **6-digit code**. The frontend then shows the "Enter code" screen, but there is no code to enter.
+## Goal
+Mobile view par "Core Team" (leaders) section bahut lamba ho jata hai. Isko ek-card-at-a-time slider bana denge — auto-slide + left/right buttons.
 
-**Root cause:** The default Lovable Cloud auth email template for magic link / signup uses `{{ .ConfirmationURL }}` (a clickable link). To deliver a numeric OTP, the template must use `{{ .Token }}` instead. Without a custom template, Cloud sends the default link-based email.
+## Kya banega
 
-## Fix
+- **Mobile (< 768px)**: leaders section me ek waqt me sirf ek leader card dikhega, poori width par.
+- **Auto-play**: har ~4 second me agla leader slide hoga (loop). User ke touch/swipe ya button click par autoplay 8 second ke liye ruk jayega, phir dobara chalu.
+- **Prev / Next buttons**: card ke neeche `<` aur `>` circular buttons, beech me dots indicator (kaunsa leader chal raha hai).
+- **Swipe**: ungli se left/right swipe karke bhi change kar sakte ho.
+- **Desktop**: bilkul waisa hi rahega jaisa abhi hai (3-column grid) — koi change nahi.
 
-Scaffold custom Lovable auth email templates and switch the magic-link + signup templates to render `{{ .Token }}` as a 6-digit code (link removed / de-emphasized). This makes the actual email match what the UI expects.
+Members grid aur HOD/Faculty sections abhi jaise hain waise hi rahenge (members already 2-column compact hain). Agar chaho to members ko bhi baad me isi tarah kar sakte hain.
 
-### Steps
+## Technical details
 
-1. **Check email domain status** (`email_domain--check_email_domain_status`).
-   - If no sender domain is configured, open the email setup dialog so the user can add one. Auth OTP emails require a configured sender.
-2. **Scaffold auth email templates** (`email_domain--scaffold_auth_email_templates`).
-3. **Edit the scaffolded templates** in `supabase/functions/_shared/email-templates/`:
-   - `magic-link.tsx` → show a large, styled 6-digit code from `{{ .Token }}`, remove the "click this link" CTA. Copy: "Your verification code" + code + "expires in 1 hour".
-   - `signup.tsx` → same treatment (since sign-up via OTP also flows through this template).
-   - Match app branding (colors from `src/index.css`, "The AI Wings" name).
-4. **Deploy** the `auth-email-hook` function (`supabase--deploy_edge_functions`).
-5. **Verify** by triggering an OTP from the Register flow and confirming the email now contains a 6-digit code.
-
-### Frontend
-
-No changes needed — `EventDetail.tsx` already calls `signInWithOtp` and `verifyOtp({ type: 'email', token })`, which accepts the 6-digit code.
-
-### Notes
-
-- DNS verification isn't required for scaffolding; if DNS is still propagating, the default link email may continue briefly until activation completes in Cloud → Emails.
-- Password login flow is unaffected.
+- `src/components/sections/Members.tsx` me leaders block ko do render paths me split karenge: desktop grid (`hidden md:grid`) aur mobile carousel (`md:hidden`).
+- Naya component `src/components/LeadersCarousel.tsx`:
+  - track div par `translateX(-index * 100%)` transition (CSS transform, smooth 500ms).
+  - `useEffect` interval autoplay, `document.hidden` hone par pause, unmount par clear.
+  - touchstart/touchend se swipe detect (threshold ~40px).
+  - buttons par `aria-label` ("Previous leader" / "Next leader"), dots par `aria-current`.
+  - Leader card markup wahi rahega (same tokens/styling, social links, glow) — sirf wrapper alag.
+- Ek hi leader hone par arrows/dots hide, autoplay off.
