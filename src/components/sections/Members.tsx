@@ -3,6 +3,7 @@ import { Section } from "@/components/Section";
 import { club } from "@/data/club";
 import { supabase } from "@/integrations/supabase/client";
 import { Crown, Sparkles, Linkedin, Instagram } from "lucide-react";
+import { LeadersCarousel } from "@/components/LeadersCarousel";
 
 const initials = (n: string) => n.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 
@@ -64,6 +65,30 @@ const SocialLinks = ({ linkedin, instagram }: { linkedin?: string | null; instag
     </div>
   );
 };
+
+const LeaderCard = ({ l, i }: { l: TeamMember; i: number }) => (
+  <div className="group relative rounded-2xl p-6 bg-gradient-card border border-border overflow-hidden hover:-translate-y-1 transition-all duration-500" style={{ animationDelay: `${i * 80}ms` }}>
+    <div className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-primary/20 blur-2xl group-hover:bg-primary/40 transition-all duration-500" />
+    <SocialLinks linkedin={l.linkedin_url} instagram={l.instagram_url} />
+    <div className="relative">
+      {l.image_url ? (
+        <img src={l.image_url} alt={l.full_name} className="h-28 w-28 rounded-2xl object-cover shadow-glow mb-4 group-hover:scale-110 transition-transform" />
+      ) : (
+        <div className="h-28 w-28 rounded-2xl bg-gradient-primary text-primary-foreground flex items-center justify-center font-display font-bold text-3xl shadow-glow mb-4 group-hover:scale-110 transition-transform">
+          {initials(l.full_name)}
+        </div>
+      )}
+      <div className="text-[10px] font-mono uppercase tracking-wider text-primary flex items-center gap-1.5 mb-1"><Sparkles className="h-3 w-3" /> Core Team</div>
+      <div className="font-display font-semibold text-xl">{l.full_name}</div>
+      <div className="text-sm text-muted-foreground">{l.role}</div>
+      {(l.branch || l.year) && (
+        <div className="text-[11px] font-mono text-muted-foreground mt-1">
+          {[l.branch, l.year].filter(Boolean).join(" · ")}
+        </div>
+      )}
+    </div>
+  </div>
+);
 
 export const Members = () => {
   const [team, setTeam] = useState<TeamMember[]>([]);
@@ -177,31 +202,19 @@ export const Members = () => {
 
       {/* Leaders */}
       {showLeaders.length > 0 && (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
-          {showLeaders.map((l, i) => (
-            <div key={l.id} className="group relative rounded-2xl p-6 bg-gradient-card border border-border overflow-hidden hover:-translate-y-1 transition-all duration-500" style={{ animationDelay: `${i * 80}ms` }}>
-              <div className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-primary/20 blur-2xl group-hover:bg-primary/40 transition-all duration-500" />
-              <SocialLinks linkedin={(l as TeamMember).linkedin_url} instagram={(l as TeamMember).instagram_url} />
-              <div className="relative">
-                {l.image_url ? (
-                  <img src={l.image_url} alt={l.full_name} className="h-28 w-28 rounded-2xl object-cover shadow-glow mb-4 group-hover:scale-110 transition-transform" />
-                ) : (
-                  <div className="h-28 w-28 rounded-2xl bg-gradient-primary text-primary-foreground flex items-center justify-center font-display font-bold text-3xl shadow-glow mb-4 group-hover:scale-110 transition-transform">
-                    {initials(l.full_name)}
-                  </div>
-                )}
-                <div className="text-[10px] font-mono uppercase tracking-wider text-primary flex items-center gap-1.5 mb-1"><Sparkles className="h-3 w-3" /> Core Team</div>
-                <div className="font-display font-semibold text-xl">{l.full_name}</div>
-                <div className="text-sm text-muted-foreground">{l.role}</div>
-                {(l.branch || l.year) && (
-                  <div className="text-[11px] font-mono text-muted-foreground mt-1">
-                    {[l.branch, l.year].filter(Boolean).join(" · ")}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+        <>
+          <div className="hidden md:grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+            {showLeaders.map((l, i) => (
+              <LeaderCard key={l.id} l={l as TeamMember} i={i} />
+            ))}
+          </div>
+          <div className="md:hidden mb-12">
+            <LeadersCarousel
+              items={showLeaders as TeamMember[]}
+              renderItem={(l, i) => <LeaderCard l={l} i={i} />}
+            />
+          </div>
+        </>
       )}
 
       {/* Members grid */}
