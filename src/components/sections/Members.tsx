@@ -66,6 +66,30 @@ const SocialLinks = ({ linkedin, instagram }: { linkedin?: string | null; instag
   );
 };
 
+const LeaderCard = ({ l, i }: { l: TeamMember; i: number }) => (
+  <div className="group relative rounded-2xl p-6 bg-gradient-card border border-border overflow-hidden hover:-translate-y-1 transition-all duration-500" style={{ animationDelay: `${i * 80}ms` }}>
+    <div className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-primary/20 blur-2xl group-hover:bg-primary/40 transition-all duration-500" />
+    <SocialLinks linkedin={l.linkedin_url} instagram={l.instagram_url} />
+    <div className="relative">
+      {l.image_url ? (
+        <img src={l.image_url} alt={l.full_name} className="h-28 w-28 rounded-2xl object-cover shadow-glow mb-4 group-hover:scale-110 transition-transform" />
+      ) : (
+        <div className="h-28 w-28 rounded-2xl bg-gradient-primary text-primary-foreground flex items-center justify-center font-display font-bold text-3xl shadow-glow mb-4 group-hover:scale-110 transition-transform">
+          {initials(l.full_name)}
+        </div>
+      )}
+      <div className="text-[10px] font-mono uppercase tracking-wider text-primary flex items-center gap-1.5 mb-1"><Sparkles className="h-3 w-3" /> Core Team</div>
+      <div className="font-display font-semibold text-xl">{l.full_name}</div>
+      <div className="text-sm text-muted-foreground">{l.role}</div>
+      {(l.branch || l.year) && (
+        <div className="text-[11px] font-mono text-muted-foreground mt-1">
+          {[l.branch, l.year].filter(Boolean).join(" · ")}
+        </div>
+      )}
+    </div>
+  </div>
+);
+
 export const Members = () => {
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loaded, setLoaded] = useState(false);
