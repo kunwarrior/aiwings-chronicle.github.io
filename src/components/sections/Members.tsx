@@ -3,6 +3,7 @@ import { Section } from "@/components/Section";
 import { club } from "@/data/club";
 import { supabase } from "@/integrations/supabase/client";
 import { Crown, Sparkles, Linkedin, Instagram } from "lucide-react";
+import { LeadersCarousel } from "@/components/LeadersCarousel";
 
 const initials = (n: string) => n.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 
