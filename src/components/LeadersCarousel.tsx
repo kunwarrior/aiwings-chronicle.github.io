@@ -43,65 +43,81 @@ export function LeadersCarousel<T>({ items, renderItem, autoPlayMs = 4000, pause
 
   return (
     <div className="w-full">
-      <div
-        className="overflow-hidden"
-        onTouchStart={(e) => {
-          touchX.current = e.touches[0].clientX;
-        }}
-        onTouchEnd={(e) => {
-          if (touchX.current === null) return;
-          const dx = e.changedTouches[0].clientX - touchX.current;
-          touchX.current = null;
-          if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
-        }}
-      >
+      <div className="relative">
         <div
-          className="flex transition-transform duration-500 ease-out"
-          style={{ transform: `translateX(-${index * 100}%)` }}
+          className="overflow-hidden rounded-2xl"
+          onTouchStart={(e) => {
+            touchX.current = e.touches[0].clientX;
+          }}
+          onTouchEnd={(e) => {
+            if (touchX.current === null) return;
+            const dx = e.changedTouches[0].clientX - touchX.current;
+            touchX.current = null;
+            if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+          }}
         >
-          {items.map((item, i) => (
-            <div key={i} className="w-full shrink-0 px-0.5">
-              {renderItem(item, i)}
-            </div>
-          ))}
+          <div
+            className="flex transition-transform duration-500 ease-out"
+            style={{ transform: `translateX(-${index * 100}%)` }}
+          >
+            {items.map((item, i) => (
+              <div key={i} className="w-full shrink-0 px-0.5">
+                {renderItem(item, i)}
+              </div>
+            ))}
+          </div>
         </div>
+
+        {count > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => go(-1)}
+              aria-label="Previous leader"
+              className="absolute left-1 top-1/2 -translate-y-1/2 z-20 h-11 w-11 rounded-full bg-card/90 backdrop-blur border-2 border-primary/60 text-primary shadow-glow flex items-center justify-center active:scale-90 transition-all"
+            >
+              <ChevronLeft className="h-6 w-6" strokeWidth={2.5} />
+            </button>
+            <button
+              type="button"
+              onClick={() => go(1)}
+              aria-label="Next leader"
+              className="absolute right-1 top-1/2 -translate-y-1/2 z-20 h-11 w-11 rounded-full bg-card/90 backdrop-blur border-2 border-primary/60 text-primary shadow-glow flex items-center justify-center active:scale-90 transition-all"
+            >
+              <ChevronRight className="h-6 w-6" strokeWidth={2.5} />
+            </button>
+          </>
+        )}
       </div>
 
       {count > 1 && (
-        <div className="mt-4 flex items-center justify-center gap-4">
-          <button
-            type="button"
-            onClick={() => go(-1)}
-            aria-label="Previous leader"
-            className="h-10 w-10 rounded-full border border-border bg-card/80 backdrop-blur flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary active:scale-95 transition-all"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <div className="flex items-center gap-2">
-            {items.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                aria-label={`Go to leader ${i + 1}`}
-                aria-current={i === index}
-                onClick={() => {
-                  holdAutoplay();
-                  setIndex(i);
-                }}
-                className={`h-2 rounded-full transition-all ${i === index ? "w-6 bg-primary" : "w-2 bg-muted-foreground/40"}`}
-              />
-            ))}
+        <>
+          <div className="mt-4 flex items-center justify-center gap-3">
+            <div className="flex items-center gap-2">
+              {items.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  aria-label={`Go to leader ${i + 1}`}
+                  aria-current={i === index}
+                  onClick={() => {
+                    holdAutoplay();
+                    setIndex(i);
+                  }}
+                  className={`h-2.5 rounded-full transition-all ${i === index ? "w-7 bg-primary shadow-glow" : "w-2.5 bg-primary/35"}`}
+                />
+              ))}
+            </div>
+            <span className="text-[11px] font-mono text-muted-foreground tabular-nums">
+              {index + 1} / {count}
+            </span>
           </div>
-          <button
-            type="button"
-            onClick={() => go(1)}
-            aria-label="Next leader"
-            className="h-10 w-10 rounded-full border border-border bg-card/80 backdrop-blur flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary active:scale-95 transition-all"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
+          <div className="mt-2 text-center text-[11px] text-muted-foreground">
+            Swipe or tap the arrows to see more leaders
+          </div>
+        </>
       )}
     </div>
   );
 }
+
