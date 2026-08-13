@@ -69,7 +69,10 @@ export const Hero = () => {
     };
     resize();
 
-    const count = Math.min(70, Math.floor((w * h) / 18000));
+    const isSmall = w < 768;
+    const maxNodes = isSmall ? 34 : 70;
+    const linkDist = isSmall ? 100 : 140;
+    const count = Math.min(maxNodes, Math.floor((w * h) / (isSmall ? 14000 : 18000)));
     for (let i = 0; i < count; i++) {
       nodes.push({
         x: Math.random() * w,
@@ -93,8 +96,8 @@ export const Hero = () => {
           const dx = nodes[i].x - nodes[j].x;
           const dy = nodes[i].y - nodes[j].y;
           const d = Math.hypot(dx, dy);
-          if (d < 140) {
-            ctx.strokeStyle = `hsl(${color} / ${(1 - d / 140) * 0.35})`;
+          if (d < linkDist) {
+            ctx.strokeStyle = `hsl(${color} / ${(1 - d / linkDist) * 0.35})`;
             ctx.lineWidth = 0.6;
             ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke();
           }
@@ -154,38 +157,80 @@ export const Hero = () => {
 
       <div className="container-x relative">
         {/* College badge — wider, no Official AI Club */}
-        <div className="flex justify-center mb-8 animate-fade-in">
-          <div className="inline-flex items-center gap-5 pl-5 pr-8 py-4 rounded-full glass backdrop-blur-xl shadow-glow">
-            <div className="relative h-16 w-16 shrink-0">
+        <div className="flex justify-center mb-6 md:mb-8 animate-fade-in">
+          <div className="inline-flex items-center gap-3 md:gap-5 pl-3 pr-4 py-2.5 md:pl-5 md:pr-8 md:py-4 rounded-full glass backdrop-blur-xl shadow-glow max-w-full">
+            <div className="relative h-11 w-11 md:h-16 md:w-16 shrink-0">
               <img src={ggctLogo} alt="GGCT" className="h-full w-full object-contain drop-shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />
             </div>
-            <div className="text-left leading-tight">
-              <div className="text-sm md:text-lg font-display font-semibold text-muted-foreground">{club.college}</div>
+            <div className="text-left leading-tight min-w-0">
+              <div className="text-[11px] sm:text-sm md:text-lg font-display font-semibold text-muted-foreground">{club.college}</div>
             </div>
-            <span className="h-2.5 w-2.5 rounded-full bg-primary animate-neural-pulse" />
+            <span className="h-2 w-2 md:h-2.5 md:w-2.5 shrink-0 rounded-full bg-primary animate-neural-pulse" />
+          </div>
+        </div>
+
+        {/* Mobile logo showcase — same vibe as desktop, scaled down */}
+        <div className="lg:hidden relative flex items-center justify-center h-[300px] sm:h-[360px] mb-6 animate-fade-in">
+          {colorEffectsOn && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-[15rem] sm:h-[18rem] w-[15rem] sm:w-[18rem] rounded-full bg-primary/30 blur-3xl animate-pulse-glow" />
+            </div>
+          )}
+
+          {effectsOn && (
+            <>
+              <div className="absolute h-[290px] w-[290px] sm:h-[350px] sm:w-[350px] rounded-full border border-primary/20 animate-[spin_30s_linear_infinite]">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute h-1.5 w-1.5 rounded-full bg-primary shadow-glow"
+                    style={{ top: "50%", left: "50%", transform: `rotate(${i * 45}deg) translateY(-145px)` }}
+                  />
+                ))}
+              </div>
+              <div className="absolute h-[230px] w-[230px] sm:h-[280px] sm:w-[280px] rounded-full border border-accent/20 animate-[spin_20s_linear_infinite_reverse]">
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-accent shadow-glow" />
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-accent shadow-glow" />
+              </div>
+              <div className="absolute h-[180px] w-[180px] sm:h-[220px] sm:w-[220px] rounded-full border-2 border-dashed border-primary/15 animate-[spin_40s_linear_infinite]" />
+            </>
+          )}
+
+          <img
+            src={heroLogo}
+            alt="The AI Wings logo"
+            className="relative z-10 w-[190px] sm:w-[240px] max-w-full drop-shadow-[0_0_45px_hsl(var(--primary)/0.7)] animate-float"
+            style={{ animationDelay: "1s" }}
+          />
+
+          <div className="absolute top-6 left-0 px-2.5 py-1 rounded-full glass backdrop-blur-xl text-[9px] font-mono uppercase tracking-wider flex items-center gap-1.5 animate-float" style={{ animationDelay: "0.5s" }}>
+            <Cpu className="h-3 w-3 text-primary" /> Machine Learning
+          </div>
+          <div className="absolute bottom-6 right-0 px-2.5 py-1 rounded-full glass backdrop-blur-xl text-[9px] font-mono uppercase tracking-wider flex items-center gap-1.5 animate-float" style={{ animationDelay: "1.5s" }}>
+            <Sparkles className="h-3 w-3 text-accent" /> Generative AI
           </div>
         </div>
 
         <div className="grid lg:grid-cols-[1.1fr_1fr] gap-10 items-center">
           <div ref={wordsRef} className="transition-transform duration-300 ease-out text-center lg:text-left">
-            <h1 className="font-display font-bold text-6xl md:text-7xl lg:text-[7.5rem] leading-[0.9] mb-6 animate-fade-in-up">
+            <h1 className="font-display font-bold text-5xl sm:text-6xl md:text-7xl lg:text-[7.5rem] leading-[0.9] mb-5 md:mb-6 animate-fade-in-up">
               <span className="block text-foreground/90">The</span>
               <span className="block text-gradient drop-shadow-[0_0_30px_hsl(var(--primary)/0.4)]">AI Wings</span>
             </h1>
 
-            <p className="max-w-2xl mx-auto lg:mx-0 text-lg md:text-xl text-muted-foreground mb-8 animate-fade-in-up" style={{ animationDelay: "0.15s", opacity: 0 }}>
+            <p className="max-w-md sm:max-w-xl lg:max-w-2xl mx-auto lg:mx-0 text-base sm:text-lg md:text-xl text-muted-foreground mb-7 md:mb-8 animate-fade-in-up" style={{ animationDelay: "0.15s", opacity: 0 }}>
               {club.tagline} Where curious minds at <span className="text-foreground font-semibold">Gyan Ganga College of Technology</span> learn, build and ship intelligent things together.
             </p>
 
-            <div className="flex flex-wrap gap-3 justify-center lg:justify-start animate-fade-in-up" style={{ animationDelay: "0.3s", opacity: 0 }}>
-              <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow group text-base px-7 py-6">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 justify-center lg:justify-start animate-fade-in-up" style={{ animationDelay: "0.3s", opacity: 0 }}>
+              <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow group w-full sm:w-auto text-sm sm:text-base px-4 sm:px-7 py-5 sm:py-6">
                 <a href="#events">
                   <Zap className="mr-2 h-4 w-4" />
                   See Events
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </a>
               </Button>
-              <Button asChild size="lg" variant="outline" className="glass text-base px-7 py-6">
+              <Button asChild size="lg" variant="outline" className="glass w-full sm:w-auto text-sm sm:text-base px-4 sm:px-7 py-5 sm:py-6">
                 <a href="#activities">
                   <Sparkles className="mr-2 h-4 w-4 text-primary" />
                   Latest Updates
@@ -194,16 +239,16 @@ export const Hero = () => {
             </div>
 
             {/* Stats */}
-            <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto lg:mx-0 animate-fade-in-up" style={{ animationDelay: "0.5s", opacity: 0 }}>
+            <div className="mt-8 md:mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-3xl mx-auto lg:mx-0 animate-fade-in-up" style={{ animationDelay: "0.5s", opacity: 0 }}>
               {[
                 { v: "50+", l: "Members" },
                 { v: "12+", l: "Workshops" },
                 { v: "06", l: "Hackathons" },
                 { v: "∞", l: "Curiosity" },
               ].map((s) => (
-                <div key={s.l} className="border-l-2 border-primary/40 pl-4 text-left">
-                  <div className="font-display font-bold text-3xl md:text-4xl text-gradient">{s.v}</div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground font-mono mt-1">{s.l}</div>
+                <div key={s.l} className="border-l-2 border-primary/40 pl-3 md:pl-4 text-left">
+                  <div className="font-display font-bold text-2xl sm:text-3xl md:text-4xl text-gradient">{s.v}</div>
+                  <div className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground font-mono mt-1">{s.l}</div>
                 </div>
               ))}
             </div>
@@ -261,10 +306,6 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* Mobile: AI Wings big logo only */}
-        <div className="lg:hidden mt-12 flex items-center justify-center animate-fade-in">
-          <img src={heroLogo} alt="The AI Wings" className="h-44 w-44 object-contain drop-shadow-[0_0_40px_hsl(var(--primary)/0.6)] animate-float" style={{ animationDelay: "1s" }} />
-        </div>
       </div>
 
       {/* Marquee strip at bottom */}
