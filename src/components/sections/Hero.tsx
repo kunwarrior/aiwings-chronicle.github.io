@@ -218,19 +218,19 @@ export const Hero = () => {
               <span className="block text-gradient drop-shadow-[0_0_30px_hsl(var(--primary)/0.4)]">AI Wings</span>
             </h1>
 
-            <p className="max-w-2xl mx-auto lg:mx-0 text-lg md:text-xl text-muted-foreground mb-8 animate-fade-in-up" style={{ animationDelay: "0.15s", opacity: 0 }}>
+            <p className="max-w-md sm:max-w-xl lg:max-w-2xl mx-auto lg:mx-0 text-base sm:text-lg md:text-xl text-muted-foreground mb-7 md:mb-8 animate-fade-in-up" style={{ animationDelay: "0.15s", opacity: 0 }}>
               {club.tagline} Where curious minds at <span className="text-foreground font-semibold">Gyan Ganga College of Technology</span> learn, build and ship intelligent things together.
             </p>
 
-            <div className="flex flex-wrap gap-3 justify-center lg:justify-start animate-fade-in-up" style={{ animationDelay: "0.3s", opacity: 0 }}>
-              <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow group text-base px-7 py-6">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 justify-center lg:justify-start animate-fade-in-up" style={{ animationDelay: "0.3s", opacity: 0 }}>
+              <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow group w-full sm:w-auto text-sm sm:text-base px-4 sm:px-7 py-5 sm:py-6">
                 <a href="#events">
                   <Zap className="mr-2 h-4 w-4" />
                   See Events
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </a>
               </Button>
-              <Button asChild size="lg" variant="outline" className="glass text-base px-7 py-6">
+              <Button asChild size="lg" variant="outline" className="glass w-full sm:w-auto text-sm sm:text-base px-4 sm:px-7 py-5 sm:py-6">
                 <a href="#activities">
                   <Sparkles className="mr-2 h-4 w-4 text-primary" />
                   Latest Updates
@@ -239,16 +239,16 @@ export const Hero = () => {
             </div>
 
             {/* Stats */}
-            <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto lg:mx-0 animate-fade-in-up" style={{ animationDelay: "0.5s", opacity: 0 }}>
+            <div className="mt-8 md:mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-3xl mx-auto lg:mx-0 animate-fade-in-up" style={{ animationDelay: "0.5s", opacity: 0 }}>
               {[
                 { v: "50+", l: "Members" },
                 { v: "12+", l: "Workshops" },
                 { v: "06", l: "Hackathons" },
                 { v: "∞", l: "Curiosity" },
               ].map((s) => (
-                <div key={s.l} className="border-l-2 border-primary/40 pl-4 text-left">
-                  <div className="font-display font-bold text-3xl md:text-4xl text-gradient">{s.v}</div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground font-mono mt-1">{s.l}</div>
+                <div key={s.l} className="border-l-2 border-primary/40 pl-3 md:pl-4 text-left">
+                  <div className="font-display font-bold text-2xl sm:text-3xl md:text-4xl text-gradient">{s.v}</div>
+                  <div className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground font-mono mt-1">{s.l}</div>
                 </div>
               ))}
             </div>
