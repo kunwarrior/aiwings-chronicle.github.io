@@ -306,10 +306,6 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* Mobile: AI Wings big logo only */}
-        <div className="lg:hidden mt-12 flex items-center justify-center animate-fade-in">
-          <img src={heroLogo} alt="The AI Wings" className="h-44 w-44 object-contain drop-shadow-[0_0_40px_hsl(var(--primary)/0.6)] animate-float" style={{ animationDelay: "1s" }} />
-        </div>
       </div>
 
       {/* Marquee strip at bottom */}
