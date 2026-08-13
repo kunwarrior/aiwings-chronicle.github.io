@@ -69,7 +69,10 @@ export const Hero = () => {
     };
     resize();
 
-    const count = Math.min(70, Math.floor((w * h) / 18000));
+    const isSmall = w < 768;
+    const maxNodes = isSmall ? 34 : 70;
+    const linkDist = isSmall ? 100 : 140;
+    const count = Math.min(maxNodes, Math.floor((w * h) / (isSmall ? 14000 : 18000)));
     for (let i = 0; i < count; i++) {
       nodes.push({
         x: Math.random() * w,
