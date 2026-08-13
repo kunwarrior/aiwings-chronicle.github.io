@@ -96,8 +96,8 @@ export const Hero = () => {
           const dx = nodes[i].x - nodes[j].x;
           const dy = nodes[i].y - nodes[j].y;
           const d = Math.hypot(dx, dy);
-          if (d < 140) {
-            ctx.strokeStyle = `hsl(${color} / ${(1 - d / 140) * 0.35})`;
+          if (d < linkDist) {
+            ctx.strokeStyle = `hsl(${color} / ${(1 - d / linkDist) * 0.35})`;
             ctx.lineWidth = 0.6;
             ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke();
           }
