@@ -31,6 +31,12 @@ interface MaintenanceValue {
   message: string;
 }
 
+interface SiteSettingRow {
+  id: string;
+  key: string;
+  value: Record<string, unknown>;
+}
+
 export const CloudControlPanel = ({ password }: { password: string }) => {
   const [status, setStatus] = useState<CloudStatus | null>(null);
   const [checking, setChecking] = useState(false);
