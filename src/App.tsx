@@ -25,9 +25,11 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route element={<MaintenanceGuard />}>
+              <Route path="/" element={<Index />} />
+              <Route path="/event/:id" element={<EventDetail />} />
+            </Route>
             <Route path="/admin" element={<Admin />} />
-            <Route path="/event/:id" element={<EventDetail />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
