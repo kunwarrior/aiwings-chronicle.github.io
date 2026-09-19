@@ -127,9 +127,9 @@ export const CloudControlPanel = ({ password }: { password: string }) => {
     if (!status) return { label: "Checking…", icon: Loader2, className: "text-muted-foreground" };
     switch (status.status) {
       case "active":
-        return { label: `Active · ${status.latencyMs ?? 0}ms`, icon: Cloud, className: "text-emerald-500" };
+        return { label: `Active · ${status.latencyMs ?? 0}ms`, icon: Cloud, className: "text-primary" };
       case "paused":
-        return { label: "Paused / waking up", icon: CloudOff, className: "text-amber-500" };
+        return { label: "Paused / waking up", icon: CloudOff, className: "text-muted-foreground" };
       case "unhealthy":
       default:
         return { label: "Unreachable", icon: CloudOff, className: "text-destructive" };
