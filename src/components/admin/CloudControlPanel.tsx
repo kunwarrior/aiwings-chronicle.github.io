@@ -31,6 +31,12 @@ interface MaintenanceValue {
   message: string;
 }
 
+interface SiteSettingRow {
+  id: string;
+  key: string;
+  value: Record<string, unknown>;
+}
+
 export const CloudControlPanel = ({ password }: { password: string }) => {
   const [status, setStatus] = useState<CloudStatus | null>(null);
   const [checking, setChecking] = useState(false);
@@ -70,8 +76,9 @@ export const CloudControlPanel = ({ password }: { password: string }) => {
 
   const loadSettings = async () => {
     try {
-      const data = await call(password, { action: "list", table: "site_settings" });
-      const row = (data ?? []).find((r: any) => r.key === "maintenance");
+      const res = await call(password, { action: "list", table: "site_settings" });
+      const rows = Array.isArray(res.data) ? res.data : [];
+      const row = rows.find((r: SiteSettingRow) => r.key === "maintenance");
       if (row) {
         setMaintenanceId(row.id);
         const v = (row.value ?? {}) as Partial<MaintenanceValue>;
@@ -120,9 +127,9 @@ export const CloudControlPanel = ({ password }: { password: string }) => {
     if (!status) return { label: "Checking…", icon: Loader2, className: "text-muted-foreground" };
     switch (status.status) {
       case "active":
-        return { label: `Active · ${status.latencyMs ?? 0}ms`, icon: Cloud, className: "text-emerald-500" };
+        return { label: `Active · ${status.latencyMs ?? 0}ms`, icon: Cloud, className: "text-primary" };
       case "paused":
-        return { label: "Paused / waking up", icon: CloudOff, className: "text-amber-500" };
+        return { label: "Paused / waking up", icon: CloudOff, className: "text-muted-foreground" };
       case "unhealthy":
       default:
         return { label: "Unreachable", icon: CloudOff, className: "text-destructive" };

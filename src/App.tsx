@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme";
 import { BrandingApplier } from "@/components/BrandingApplier";
 import { MagneticCursor } from "@/components/MagneticCursor";
+import { MaintenanceGuard } from "@/components/MaintenanceGuard";
 import Index from "./pages/Index.tsx";
 import Admin from "./pages/Admin.tsx";
 import EventDetail from "./pages/EventDetail.tsx";
@@ -24,9 +25,11 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route element={<MaintenanceGuard />}>
+              <Route path="/" element={<Index />} />
+              <Route path="/event/:id" element={<EventDetail />} />
+            </Route>
             <Route path="/admin" element={<Admin />} />
-            <Route path="/event/:id" element={<EventDetail />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
