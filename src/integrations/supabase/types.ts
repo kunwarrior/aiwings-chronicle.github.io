@@ -68,6 +68,56 @@ export type Database = {
         }
         Relationships: []
       }
+      certificates: {
+        Row: {
+          achievement_type: string
+          certificate_id: string
+          created_at: string
+          email: string | null
+          event_id: string | null
+          event_title: string
+          full_name: string
+          id: string
+          issued_by: string
+          issued_on: string
+          updated_at: string
+        }
+        Insert: {
+          achievement_type?: string
+          certificate_id: string
+          created_at?: string
+          email?: string | null
+          event_id?: string | null
+          event_title: string
+          full_name: string
+          id?: string
+          issued_by?: string
+          issued_on?: string
+          updated_at?: string
+        }
+        Update: {
+          achievement_type?: string
+          certificate_id?: string
+          created_at?: string
+          email?: string | null
+          event_id?: string | null
+          event_title?: string
+          full_name?: string
+          id?: string
+          issued_by?: string
+          issued_on?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificates_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           created_at: string
@@ -279,7 +329,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      verify_certificate: {
+        Args: { p_certificate_id: string }
+        Returns: {
+          achievement_type: string
+          certificate_id: string
+          event_title: string
+          full_name: string
+          issued_by: string
+          issued_on: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
