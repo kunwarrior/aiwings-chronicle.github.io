@@ -275,6 +275,7 @@ const Admin = () => {
             <TabsTrigger value="achievements">Achievements</TabsTrigger>
             <TabsTrigger value="registrations">Registrations</TabsTrigger>
             <TabsTrigger value="settings"><SettingsIcon className="h-3.5 w-3.5 mr-1" /> Settings</TabsTrigger>
+            <TabsTrigger value="cloud"><Cloud className="h-3.5 w-3.5 mr-1" /> Cloud</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard">
