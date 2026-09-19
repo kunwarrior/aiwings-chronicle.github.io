@@ -70,8 +70,9 @@ export const CloudControlPanel = ({ password }: { password: string }) => {
 
   const loadSettings = async () => {
     try {
-      const data = await call(password, { action: "list", table: "site_settings" });
-      const row = (data ?? []).find((r: any) => r.key === "maintenance");
+      const res = await call(password, { action: "list", table: "site_settings" });
+      const rows = Array.isArray(res.data) ? res.data : [];
+      const row = rows.find((r: SiteSettingRow) => r.key === "maintenance");
       if (row) {
         setMaintenanceId(row.id);
         const v = (row.value ?? {}) as Partial<MaintenanceValue>;
