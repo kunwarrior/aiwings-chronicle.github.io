@@ -47,6 +47,19 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
+    if (action === "cloud-status" || action === "wake") {
+      const start = Date.now();
+      try {
+        const { error } = await supabase.from("site_settings").select("id").limit(1);
+        if (error) throw error;
+        return json({ status: "active", latencyMs: Date.now() - start });
+      } catch (err) {
+        const msg = (err as Error).message || "";
+        const paused = msg.toLowerCase().includes("pause") || msg.includes("503") || msg.includes("521");
+        return json({ status: paused ? "paused" : "unhealthy", latencyMs: Date.now() - start });
+      }
+    }
+
     if (action === "stats") {
       const [evRes, regRes, teamRes, galRes, actRes, achRes] = await Promise.all([
         supabase.from("events").select("id, title, event_date, is_live, registration_open, fee_amount, created_at"),
