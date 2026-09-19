@@ -393,6 +393,10 @@ const Admin = () => {
           <TabsContent value="settings">
             <SiteSettingsPanel password={password} />
           </TabsContent>
+
+          <TabsContent value="cloud">
+            <CloudControlPanel password={password} />
+          </TabsContent>
         </Tabs>
       </div>
     </main>
